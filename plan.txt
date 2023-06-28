@@ -1,0 +1,5 @@
+ssh login
+
+on connect start game client
+
+game client connects to game server via websockets.
