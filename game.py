@@ -1,5 +1,6 @@
 import random
 import os
+import ui_elements as ui
 
 from cards import SuitCards, Hand
 
@@ -39,6 +40,7 @@ class HumanPlayer(Player):
         card = None
         while card is None:
             value = input("Select card value: ")
+            print()
 
             # fix types
             if value not in ["J", "Q", "K", "A", "j" ,"q" ,"k", "a"]:
@@ -51,6 +53,12 @@ class PlayArea():
         self.clear()
         self.round = 0
 
+    def print_round(self):
+        print()
+        print(ui.DIVIDER)
+        print("Round: ", self.round) 
+        print(ui.DIVIDER)
+
     def start_round(self, card_1, card_2, prize):
         self.player_1_card = card_1
         self.player_2_card = card_2
@@ -58,16 +66,16 @@ class PlayArea():
         self.round += 1
 
     def display_prize(self):
-        print("prizes: ")
+        print("Prizes: ")
         for prize in self.prize_cards:
             prize.display()
 
     def display_cards(self):
         print()
-        print("-------------------------")
-        print("round: ", self.round)
-        print("player 1: {}:{}".format(self.player_1_card.value(), self.player_1_card.suit()))
-        print("player 2: {}:{}".format(self.player_2_card.value(), self.player_2_card.suit()))
+        print("Cards Played:")
+        print(ui.TAB1 + "player 1: {}:{}".format(self.player_1_card.value(), self.player_1_card.suit()))
+        print(ui.TAB1 + "player 2: {}:{}".format(self.player_2_card.value(), self.player_2_card.suit()))
+        print()
         self.display_prize()
 
     def prize_value(self):
@@ -137,9 +145,9 @@ class GameBase():
 
     def display_score(self):
         print()
-        print("Player_1 score: {}".format(self.player_1.score()))
-        print("Player_2 score: {}".format(self.player_2.score()))
-        print("------------------------------------")
+        print("Scores:")
+        print(ui.TAB1 + "Player_1 score: {}".format(self.player_1.score()))
+        print(ui.TAB1 + "Player_2 score: {}".format(self.player_2.score()))
 
 # Untested
 class AIAIGame(GameBase):
@@ -180,13 +188,16 @@ class AIHumanGame(GameBase):
             prize = self.prize_deck.draw()
             player_1_card = self.player_1.play_random_card()
 
+            self.play_area.print_round()
             self.player_2.show_hand()
             print()
             print("prize (FIX does not display all pizes in play area): ")
             prize.display()
             print()
             player_2_card = self.player_2.play_card()
+            os.system("reset")
 
+            self.play_area.print_round()
             self.play_area.start_round(player_1_card, player_2_card, prize)
             self.play_area.display_cards()
 
