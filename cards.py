@@ -1,21 +1,26 @@
 import random
 
+import ui_elements as ui
+
 class Card():
     def __init__(self, suit, val):
         self._suit = suit
         self._val = val
+        self.nval = self.get_num_value()
 
-    def num_value(self):
+    def get_num_value(self, ace="low"):
         if isinstance(self._val, int):
-            return self._val
+            return int(self._val)
         elif self._val == "J":
-            return 10
-        elif self._val == "Q":
             return 11
-        elif self._val == "K":
+        elif self._val == "Q":
             return 12
-        elif self._val == "A":
+        elif self._val == "K":
+            return 13
+        elif (self._val == "A") and (ace == "low"):
             return 1
+        elif (self._val == "A") and (ace == "high"):
+            return 14
         else:
             return None
 
@@ -26,7 +31,7 @@ class Card():
         return self._suit
 
     def display(self):
-        print(str(self._val) + ":" + self._suit)
+        print(ui.RVERT + str(self._val) + " " + self._suit + ui.LVERT)
 
 class CardStack():
     def __init__(self, cards):
@@ -41,6 +46,10 @@ class CardStack():
 
     def shuffle(self):
         random.shuffle(self._order)
+
+    # untested
+    def sort_cards(self, ace="Low"):
+        self._order = sorted(self._order, key=lambda x: x.nval)
 
     def empty(self):
         if self.card_count() == 0:
@@ -77,6 +86,7 @@ class SuitCards(CardStack):
 class Hand(SuitCards):
     def __init__(self, suit):
         SuitCards.__init__(self, suit)
+        self.sort_cards()
 
     def select_random_card(self):
         selected = random.choice(range(self.card_count()))
@@ -94,24 +104,23 @@ class Hand(SuitCards):
             return None
 
     def display_cards(self):
-
         print()
         print("Your Hand:")
         if len(self._order) <= 7:
-            print("", end="| ")
+            print("", end=ui.LVERT)
             for x in range(len(self._order)):
                 card = self._order[x]
-                print(str(card.value()) + " " + card.suit(), end=" | ")
+                print(str(card.value()) + " " + card.suit(), end=ui.CVERT)
             print()
         else:
-            print("", end="| ")
+            print("", end=ui.LVERT)
             for x in range(7):
                 card = self._order[x]
-                print(str(card.value()) + " " + card.suit(), end=" | ")
+                print(str(card.value()) + " " + card.suit(), end=ui.CVERT)
             print()
-            print("", end="| ")
+            print("", end=ui.LVERT)
             for x in range(7, len(self._order)):
                 card = self._order[x]
-                print(str(card.value()) + " " + card.suit(), end=" | ")
+                print(str(card.value()) + " " + card.suit(), end=ui.CVERT)
             print()
 
