@@ -89,10 +89,6 @@ class Hand(SuitCards):
         self.sort_cards()
 
     def select_random_card(self):
-        # selected = random.choice(range(self.card_count()))
-        print("card_count: ", self.card_count())
-        print(range(self.card_count()))
-        print()
         selected = random.choice(range(self.card_count()))
 
         return self._order.pop(selected)
