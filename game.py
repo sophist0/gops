@@ -174,7 +174,7 @@ class GameBase():
         print(ui.TAB1 + "Player_1 score: {}".format(self.player_1.score()))
         print(ui.TAB1 + "Player_2 score: {}".format(self.player_2.score()))
 
-# Untested
+# Untested, FIX
 class AIAIGame(GameBase):
     def __init__(self):
         player_1 = AIPlayer(Hand("Hearts"))
@@ -187,7 +187,14 @@ class AIAIGame(GameBase):
             player_1_card = self.player_1.play_random_card()
             player_2_card = self.player_2.play_random_card()
 
-            self.play_area.start_round(player_1_card, player_2_card, prize)
+            self.play_area.print_round()
+            self.play_area.flip_prize(prize)
+            self.play_area.display_pizes()
+
+            player_1_card = self.player_1.play_random_card()
+            player_2_card = self.player_2.play_random_card()
+
+            self.play_area.flip_cards(player_1_card, player_2_card)
             self.play_area.display_cards()
 
             self.play_area.award_points(self.player_1, self.player_2)

@@ -56,7 +56,10 @@ def test_PlayArea():
 
     prize_deck = SuitCards("Clubs")
     prize_card_1 = prize_deck.draw()
-    play_area_1.start_round(card_1, card_2, prize_card_1)
+
+    # play_area_1.start_round(card_1, card_2, prize_card_1)
+    play_area_1.flip_prize(prize_card_1)
+    play_area_1.flip_cards(card_1, card_2)
 
     assert isinstance(play_area_1.player_1_card, Card)
     assert play_area_1.player_1_card.suit() == "Hearts"
@@ -74,9 +77,13 @@ def test_PlayArea():
     card_2 = player_2.play_random_card()
 
     prize_card_2 = prize_deck.draw()
-    play_area_1.start_round(card_1, card_2, prize_card_2)
 
-    assert (prize_card_1.num_value() + prize_card_2.num_value()) == play_area_1.prize_value()
+    # play_area_1.start_round(card_1, card_2, prize_card_2)
+    play_area_1.flip_prize(prize_card_2)
+    play_area_1.flip_cards(card_1, card_2)
+
+
+    assert (prize_card_1.nval + prize_card_2.nval) == play_area_1.prize_value()
 
     # test award_points
     play_area_2 = PlayArea()
@@ -91,16 +98,19 @@ def test_PlayArea():
 
     prize_deck = SuitCards("Clubs")
     prize_card_1 = prize_deck.draw()
-    play_area_2.start_round(card_1, card_2, prize_card_1)
+
+    # play_area_2.start_round(card_1, card_2, prize_card_1)
+    play_area_2.flip_prize(prize_card_1)
+    play_area_2.flip_cards(card_1, card_2)
 
     play_area_2.award_points(player_1, player_2)
    
     # would be better to trigger individual cases
-    if card_1.num_value() > card_2.num_value():
-        assert player_1.score() == prize_card_1.num_value()
+    if card_1.nval > card_2.nval:
+        assert player_1.score() == prize_card_1.nval
         assert player_2.score() == 0
-    elif card_2.num_value() > card_1.num_value():
-        assert player_2.score() == prize_card_1.num_value()
+    elif card_2.nval > card_1.nval:
+        assert player_2.score() == prize_card_1.nval
         assert player_1.score() == 0
     else:
         assert player_1.score() == 0
