@@ -9,10 +9,19 @@ def get_values(cards):
     return values
 
 def test_Card():
-    card = Card("Clubs", "A")
+    card_1 = Card("Clubs", "A")
 
-    assert card.value() == "A"
-    assert card.suit() == "Clubs"
+    assert card_1.value() == "A"
+    assert card_1.suit() == "Clubs"
+    assert card_1.nval == 1
+
+    card_1.ace = "high"
+    assert card_1.get_num_value() == 14
+
+    card_1._val = None
+    assert card_1.get_num_value() == None
+
+    card_1.display()
 
 def test_CardStack():
     cards = [Card("Clubs", "A"), Card("Clubs", 2), Card("Clubs", 3), Card("Clubs", 4), Card("Clubs", 5)]
@@ -48,6 +57,8 @@ def test_CardStack():
                 break    
     assert not same
 
+    stack_1.display_cards()
+
 def test_SuitCards():
 
     suit = SuitCards("Clubs")
@@ -82,4 +93,8 @@ def test_Hand():
             random_card = True
             break
     assert random_card == True
-    
+
+    hand.display_cards()
+    for x in range(5):
+        card = hand.draw()
+    hand.display_cards()  

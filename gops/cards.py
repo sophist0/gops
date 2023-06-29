@@ -4,11 +4,13 @@ import gops.ui_elements as ui
 
 class Card():
     def __init__(self, suit, val):
+        self.ace="low"
         self._suit = suit
         self._val = val
         self.nval = self.get_num_value()
 
-    def get_num_value(self, ace="low"):
+    # Move this to the card suit class
+    def get_num_value(self):
         if isinstance(self._val, int):
             return int(self._val)
         elif self._val == "J":
@@ -17,9 +19,9 @@ class Card():
             return 12
         elif self._val == "K":
             return 13
-        elif (self._val == "A") and (ace == "low"):
+        elif (self._val == "A") and (self.ace == "low"):
             return 1
-        elif (self._val == "A") and (ace == "high"):
+        elif (self._val == "A") and (self.ace == "high"):
             return 14
         else:
             return None
