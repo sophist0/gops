@@ -184,8 +184,6 @@ class AIAIGame(GameBase):
     def run_game(self):
         while not self.game_over():
             prize = self.prize_deck.draw()
-            player_1_card = self.player_1.play_random_card()
-            player_2_card = self.player_2.play_random_card()
 
             self.play_area.print_round()
             self.play_area.flip_prize(prize)
