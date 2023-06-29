@@ -1,8 +1,8 @@
 import random
 import os
-import ui_elements as ui
 
-from cards import SuitCards, Hand
+import gops_core.ui_elements as ui
+from gops_core.cards import SuitCards, Hand
 
 class Player():
     def __init__(self, hand):

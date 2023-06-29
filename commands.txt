@@ -1,1 +1,14 @@
-python3 -m pytest
+Run tests:
+
+    python3 -m pytest
+
+
+Run tests with coverage:
+
+    python3 -m pytest --cov=gops_core tests/
+
+
+Run tests with coverage and missing lines:
+
+    python3 -m pytest --cov=gops_core tests/ --cov-report term-missing
+

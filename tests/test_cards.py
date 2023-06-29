@@ -1,6 +1,6 @@
 import copy
 
-from cards import Card, CardStack, SuitCards, Hand
+from gops_core.cards import Card, CardStack, SuitCards, Hand
 
 def get_values(cards):
     values = []
