@@ -1,6 +1,6 @@
 import random
 
-import gops_core.ui_elements as ui
+import gops.ui_elements as ui
 
 class Card():
     def __init__(self, suit, val):

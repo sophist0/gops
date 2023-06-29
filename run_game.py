@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from game import AIHumanGame, AIAIGame
+from gops.game import AIHumanGame, AIAIGame
 
 new_game = AIHumanGame()
 #new_game = AIAIGame()

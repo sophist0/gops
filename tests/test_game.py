@@ -1,7 +1,7 @@
 import io
 
-from gops_core.game import Player, AIPlayer, HumanPlayer, PlayArea, GameBase
-from gops_core.cards import Card, SuitCards, Hand
+from gops.game import Player, AIPlayer, HumanPlayer, PlayArea, GameBase
+from gops.cards import Card, SuitCards, Hand
 
 def test_Player():
    hand = Hand("Hearts")

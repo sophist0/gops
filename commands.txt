@@ -10,5 +10,5 @@ Run tests with coverage:
 
 Run tests with coverage and missing lines:
 
-    python3 -m pytest --cov=gops_core tests/ --cov-report term-missing
+    python3 -m pytest --cov=gops tests/ --cov-report term-missing
 
