@@ -1,6 +1,6 @@
 import io
 
-from gops.game import Player, AIPlayer, HumanPlayer, PlayArea, GameBase
+from gops.game import Player, AIPlayer, HumanPlayer, PlayArea, GameBase, AIAIGame, AIHumanGame
 from gops.cards import Card, SuitCards, Hand
 
 def test_Player():
@@ -27,14 +27,21 @@ def test_AIPlayer():
 
 def test_HumanPlayer(monkeypatch):
 
-    monkeypatch.setattr("sys.stdin", io.StringIO("2"))
     hand = Hand("Hearts")
     player = HumanPlayer(hand)
+
+    monkeypatch.setattr("sys.stdin", io.StringIO("2"))
     card = player.play_card()
     
     assert isinstance(card, Card)
     assert card.value() == 2
     assert card.suit() == "Hearts"
+
+    monkeypatch.setattr("sys.stdin", io.StringIO("k"))
+    card = player.play_card() 
+    assert card.value() == "K"
+
+    player.show_hand()
 
 def test_PlayArea():
 
@@ -57,7 +64,6 @@ def test_PlayArea():
     prize_deck = SuitCards("Clubs")
     prize_card_1 = prize_deck.draw()
 
-    # play_area_1.start_round(card_1, card_2, prize_card_1)
     play_area_1.flip_prize(prize_card_1)
     play_area_1.flip_cards(card_1, card_2)
 
@@ -78,10 +84,8 @@ def test_PlayArea():
 
     prize_card_2 = prize_deck.draw()
 
-    # play_area_1.start_round(card_1, card_2, prize_card_2)
     play_area_1.flip_prize(prize_card_2)
     play_area_1.flip_cards(card_1, card_2)
-
 
     assert (prize_card_1.nval + prize_card_2.nval) == play_area_1.prize_value()
 
@@ -99,12 +103,23 @@ def test_PlayArea():
     prize_deck = SuitCards("Clubs")
     prize_card_1 = prize_deck.draw()
 
-    # play_area_2.start_round(card_1, card_2, prize_card_1)
     play_area_2.flip_prize(prize_card_1)
     play_area_2.flip_cards(card_1, card_2)
 
+    play_area_2.display_pizes()
+    play_area_2.display_cards()
+
     play_area_2.award_points(player_1, player_2)
-   
+    play_area_2.print_round()
+
+    # test prize string
+    card_3 = Card("Spades", "A")
+    card_4 = Card("Spades", "9")
+    play_area_2.flip_prize(card_3)
+    play_area_2.flip_prize(card_4)
+    prize_string = play_area_2.get_prize_string()
+    assert prize_string == "| A Spades | 9 Spades |"
+
     # would be better to trigger individual cases
     if card_1.nval > card_2.nval:
         assert player_1.score() == prize_card_1.nval
@@ -116,7 +131,7 @@ def test_PlayArea():
         assert player_1.score() == 0
         assert player_2.score() == 0
 
-def test_Game():
+def test_GameBase():
 
     player_1 = AIPlayer("Hearts")
     player_2 = AIPlayer("Spades")
@@ -143,6 +158,33 @@ def test_Game():
     game_3.player_2.quit()
     assert game_3.game_over() == True
 
+    game_1.display_score()
+
 # Need to test AIAIGame
+def test_AIAIGame(mocker):
+    ai_game = AIAIGame()
+    v = io.StringIO("\r")
+    inputs = [v,v,v,v,v,v,v,v,v,v,v,v,v]
+    mocker.patch("builtins.input", side_effect=inputs)
+    ai_game.run_game(reset=False)
 
 # Need to test AIHumanGame
+def test_AIHumanGame(mocker):
+    human_game = AIHumanGame()
+    v = io.StringIO("\r")
+    # s = list(map(io.StringIO, ["A","2","3","4","5","6","7","8","9","10","J","Q","K"]))
+    s = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"]
+
+    print(type(s[0]))
+    inputs = []
+    for x in range(len(s)):
+        inputs.append(v)
+        inputs.append(s[x])
+    inputs.append(v)
+
+    print()
+    print("inputs")
+    print(inputs)
+    print(len(inputs))
+    mocker.patch("builtins.input", side_effect=inputs)
+    human_game.run_game(reset=False)

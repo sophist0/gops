@@ -1,5 +1,6 @@
 import random
 import os
+import time
 
 import gops.ui_elements as ui
 from gops.cards import SuitCards, Hand
@@ -33,6 +34,10 @@ class HumanPlayer(Player):
     def __init__(self, hand):
         Player.__init__(self, hand)
 
+        # move somewhere more general
+        self.str_2_val = {"2":2,"3":3,"4":4,"5":5,"6":6,"7":7,"8":8,"9":9,"10":10,
+                        "J":"J","j":"J","Q":"Q","q":"Q","K":"K","k":"K","A":"A","a":"A"}
+
     def show_hand(self):
         self._hand.display_cards()
 
@@ -43,15 +48,11 @@ class HumanPlayer(Player):
             value = input("Select card value: ")
             print()
             print(ui.DIVIDER)
- 
-            # fix types
-            if value in ["J", "Q", "K", "A", "j" ,"q" ,"k", "a"]:
-                value = value.upper()
-            elif value in ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]:
-                value = int(value)
-            else:
-                continue
-            card = self._hand.select_card(self._hand.suit, value)
+
+            if value in self.str_2_val:
+                value = self.str_2_val[value]               
+                card = self._hand.select_card(self._hand.suit, value)
+    
         return card
 
 class PlayArea():
@@ -181,7 +182,7 @@ class AIAIGame(GameBase):
         player_2 = AIPlayer(Hand("Spades"))
         GameBase.__init__(self, player_1, player_2)
 
-    def run_game(self):
+    def run_game(self, reset=True):
         while not self.game_over():
             prize = self.prize_deck.draw()
 
@@ -201,7 +202,8 @@ class AIAIGame(GameBase):
             # wait
             print()
             input("Continue.....")
-            os.system("reset")
+            if reset:
+                os.system("reset")
 
         self.decide_winner()
         self.final_msg()
@@ -213,7 +215,7 @@ class AIHumanGame(GameBase):
         player_2 = HumanPlayer(Hand("Spades"))
         GameBase.__init__(self, player_1, player_2)
 
-    def run_game(self):
+    def run_game(self, reset=True):
         while not self.game_over():
             self.play_area.print_round()
             self.player_2.show_hand()
@@ -234,7 +236,8 @@ class AIHumanGame(GameBase):
             # wait
             print()
             input("Continue.....")
-            os.system("reset")
+            if reset:
+                os.system("reset")
 
         self.decide_winner()
         self.final_msg()
