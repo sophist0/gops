@@ -20,7 +20,7 @@ def test_Player():
 def test_AIPlayer():
    hand = Hand("Hearts")
    player = AIPlayer(hand)
-   card = player.play_random_card()
+   card = player.play_card()
 
    assert isinstance(card, Card)
    assert card.suit() == "Hearts"
@@ -55,11 +55,11 @@ def test_PlayArea():
     # round 1
     player_1_hand = Hand("Hearts")
     player_1 = AIPlayer(player_1_hand)
-    card_1 = player_1.play_random_card()
+    card_1 = player_1.play_card()
 
     player_2_hand = Hand("Spades")
     player_2 = AIPlayer(player_2_hand)
-    card_2 = player_2.play_random_card()
+    card_2 = player_2.play_card()
 
     prize_deck = SuitCards("Clubs")
     prize_card_1 = prize_deck.draw()
@@ -79,8 +79,8 @@ def test_PlayArea():
     assert play_area_1.round == 1
 
     # round 2
-    card_1 = player_1.play_random_card()
-    card_2 = player_2.play_random_card()
+    card_1 = player_1.play_card()
+    card_2 = player_2.play_card()
 
     prize_card_2 = prize_deck.draw()
 
@@ -94,11 +94,11 @@ def test_PlayArea():
 
     player_1_hand = Hand("Hearts")
     player_1 = AIPlayer(player_1_hand)
-    card_1 = player_1.play_random_card()
+    card_1 = player_1.play_card()
 
     player_2_hand = Hand("Spades")
     player_2 = AIPlayer(player_2_hand)
-    card_2 = player_2.play_random_card()
+    card_2 = player_2.play_card()
 
     prize_deck = SuitCards("Clubs")
     prize_card_1 = prize_deck.draw()

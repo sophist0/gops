@@ -24,11 +24,13 @@ class Player():
         return self._quit
 
 class AIPlayer(Player):
-    def __init__(self, hand):
+    def __init__(self, hand, difficulty=1):
         Player.__init__(self, hand)
+        self._difficulty = difficulty
 
-    def play_random_card(self):
-        return self._hand.select_random_card()
+    def play_card(self):
+        if self._difficulty == 1:
+            return self._hand.select_random_card()
 
 class HumanPlayer(Player):
     def __init__(self, hand):
@@ -196,8 +198,8 @@ class AIAIGame(GameBase):
             self.play_area.flip_prize(prize)
             self.play_area.display_pizes()
 
-            player_1_card = self.player_1.play_random_card()
-            player_2_card = self.player_2.play_random_card()
+            player_1_card = self.player_1.play_card()
+            player_2_card = self.player_2.play_card()
 
             self.play_area.flip_cards(player_1_card, player_2_card)
             self.play_area.display_cards()
@@ -225,7 +227,7 @@ class AIHumanGame(GameBase):
             self.play_area.flip_prize(prize)
             self.play_area.display_pizes()
 
-            player_1_card = self.player_1.play_random_card()
+            player_1_card = self.player_1.play_card()
             player_2_card = self.player_2.play_card()
 
             self.play_area.flip_cards(player_1_card, player_2_card)
