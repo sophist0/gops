@@ -129,8 +129,9 @@ class PlayArea():
         self.prize_cards = []
 
 class GameBase():
-    def __init__(self, player_1, player_2):
+    def __init__(self, player_1, player_2, reset=True):
         self.prize_deck = None
+        self.reset = reset
         self.player_1 = player_1
         self.player_2 = player_2
        
@@ -175,19 +176,19 @@ class GameBase():
         print(ui.TAB1 + "Player_1 score: {}".format(self.player_1.score()))
         print(ui.TAB1 + "Player_2 score: {}".format(self.player_2.score()))
 
-    def wait_to_reset(self):
+    def wait_and_reset(self):
         print()
         input("Continue.....")
-        if reset:
+        if self.reset:
             os.system("reset")
 
 class AIAIGame(GameBase):
-    def __init__(self):
+    def __init__(self, reset=True):
         player_1 = AIPlayer(Hand("Hearts"))
         player_2 = AIPlayer(Hand("Spades"))
-        GameBase.__init__(self, player_1, player_2)
+        GameBase.__init__(self, player_1, player_2, reset)
 
-    def run_game(self, reset=True):
+    def run_game(self):
         while not self.game_over():
             prize = self.prize_deck.draw()
 
@@ -204,18 +205,18 @@ class AIAIGame(GameBase):
             self.play_area.award_points(self.player_1, self.player_2)
             self.display_score()
 
-            self.wait_to_reset()
+            self.wait_and_reset()
 
         self.decide_winner()
         self.final_msg()
 
 class AIHumanGame(GameBase):
-    def __init__(self):
+    def __init__(self, reset=True):
         player_1 = AIPlayer(Hand("Hearts"))
         player_2 = HumanPlayer(Hand("Spades"))
-        GameBase.__init__(self, player_1, player_2)
+        GameBase.__init__(self, player_1, player_2, reset)
 
-    def run_game(self, reset=True):
+    def run_game(self):
         while not self.game_over():
             self.play_area.print_round()
             self.player_2.show_hand()
@@ -233,7 +234,7 @@ class AIHumanGame(GameBase):
             self.play_area.award_points(self.player_1, self.player_2)
             self.display_score()
 
-            self.wait_to_reset()
+            self.wait_and_reset()
 
         self.decide_winner()
         self.final_msg()

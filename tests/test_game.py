@@ -162,15 +162,15 @@ def test_GameBase():
 
 # Need to test AIAIGame
 def test_AIAIGame(mocker):
-    ai_game = AIAIGame()
+    ai_game = AIAIGame(reset=False)
     v = io.StringIO("\r")
     inputs = [v,v,v,v,v,v,v,v,v,v,v,v,v]
     mocker.patch("builtins.input", side_effect=inputs)
-    ai_game.run_game(reset=False)
+    ai_game.run_game()
 
 # Need to test AIHumanGame
 def test_AIHumanGame(mocker):
-    human_game = AIHumanGame()
+    human_game = AIHumanGame(reset=False)
     v = io.StringIO("\r")
     s = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"]
     print(type(s[0]))
@@ -185,4 +185,4 @@ def test_AIHumanGame(mocker):
     print(inputs)
     print(len(inputs))
     mocker.patch("builtins.input", side_effect=inputs)
-    human_game.run_game(reset=False)
+    human_game.run_game()
