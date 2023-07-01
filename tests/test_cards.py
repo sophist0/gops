@@ -1,5 +1,6 @@
 import copy
 import numpy as np
+from collections import defaultdict
 
 from gops.cards import Card, CardStack, SuitCards, Hand
 
@@ -134,3 +135,22 @@ def test_Hand():
         if idx > 0:
             assert dist[idx-1] >= dist[idx]
 
+    # test select card strategy 1
+    selected_values_7 = defaultdict(int)
+    selected_values_k = defaultdict(int)
+    for x in range(n_select):
+        tmp_hand_7 = Hand("Diamonds")
+        card_7 = tmp_hand_7.select_card_strategy_1(7)
+
+        tmp_hand_k = Hand("Diamonds")
+        card_k = tmp_hand_k.select_card_strategy_1(13)
+
+        selected_values_7[card_7.nval] += 1
+        selected_values_k[card_k.nval] += 1
+
+    assert selected_values_7[7] > selected_values_7[8]
+    assert selected_values_7[8] > selected_values_7[6]
+
+    k_selected = selected_values_k[13]
+    for key in selected_values_k.keys():
+        assert k_selected >= selected_values_k[key]

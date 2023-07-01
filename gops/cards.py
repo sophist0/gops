@@ -107,7 +107,7 @@ class Hand(SuitCards):
         prob = self.card_count()
         for x in range(self.card_count()):
             card_prob[x] = prob
-            prob -= (prob / 2) 
+            prob -= (prob / 3) 
         return card_prob / sum(card_prob)
 
 
@@ -126,27 +126,21 @@ class Hand(SuitCards):
         # if prize_value < 7, select near min value vard.
         # else select card close to prize value.
         card_weight = self.get_card_nvals() 
-        n_cards = len(card_nvals)
-
-        prob = n_cards
+        prob = self.card_count()
         if prize_value < 7:
-
-            # get sorted indexes to map back
             card_indexes = np.argsort(card_weight)
-            # card_weight.sort()        
-
         else:
-            card_weight = np.abs(np.asarray(card_weight) - price_value)
+            card_weight = np.abs(np.asarray(card_weight) - prize_value)
+            # bias towards higher values
+            low_slice = list(range(2*prize_value - (self.card_count() + 1), prize_value-1))
+            card_weight = card_weight.astype(float)
+            card_weight[low_slice] += 0.1
 
-            # get sorted indexes to map back
             card_indexes = np.argsort(card_weight)
-            # card_weight.sort()
 
         index = self.select_index()
         card_loc = card_indexes[index]       
-
         return self._order.pop(card_loc)
-
 
     def select_card(self, suit, val):
 
