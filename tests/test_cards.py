@@ -1,6 +1,9 @@
 import copy
+import numpy as np
 
 from gops.cards import Card, CardStack, SuitCards, Hand
+
+CLOSE=0.00001
 
 def get_values(cards):
     values = []
@@ -97,4 +100,37 @@ def test_Hand():
     hand.display_cards()
     for x in range(5):
         card = hand.draw()
-    hand.display_cards()  
+    hand.display_cards()
+
+    # test distribution
+    hand_2 = Hand("Spades")
+    dist = hand_2.get_dist()
+
+    assert np.isclose(sum(dist), 1, CLOSE)
+    for idx, val in enumerate(dist):
+        assert val <= 1
+        assert val >= 0
+        if idx > 0:
+            assert dist[x-1] > dist[x]
+
+    # test select index
+    index_count = [0 for x in range(hand_2.card_count())]
+    n_select = 1000
+    last_index = None
+    equal_count = 0
+    nequal_count = 0
+    for x in range(n_select):
+        idx = hand_2.select_index()
+        index_count[idx] += 1
+
+        if (last_index is not None) and (idx != last_index):
+            nequal_count += 1
+        elif (last_index is not None):
+            equal_count += 1
+
+        last_index = idx
+
+    for idx, val in enumerate(index_count):
+        if idx > 0:
+            assert dist[idx-1] >= dist[idx]
+

@@ -101,19 +101,22 @@ class Hand(SuitCards):
 
         return self._order.pop(selected)
 
-    def select_index(self, n_cards):
-
+    def get_dist(self):
         # construct distribution
-        card_prob = np.asarray([0 for x in range(n_cards)])
-        for x in range(n_cards):
+        card_prob = np.asarray([0 for x in range(self.card_count())])
+        prob = self.card_count()
+        for x in range(self.card_count()):
             card_prob[x] = prob
             prob -= (prob / 2) 
-        card_prob = card_prob / sum(card_prob)
+        return card_prob / sum(card_prob)
 
+
+    def select_index(self):
         # select index based on distribution
+        card_prob = self.get_dist()
         r = random.random()
         s = 0
-        for x in range(n_cards):
+        for x in range(self.card_count()):
             s += card_prob[x]
             if r <= s:
                 return x
@@ -133,7 +136,7 @@ class Hand(SuitCards):
             # card_weight.sort()        
 
         else:
-            card_weight = np.asarray(card_weight) - price_value
+            card_weight = np.abs(np.asarray(card_weight) - price_value)
 
             # get sorted indexes to map back
             card_indexes = np.argsort(card_weight)
