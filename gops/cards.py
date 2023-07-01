@@ -121,7 +121,6 @@ class Hand(SuitCards):
             if r <= s:
                 return x
 
-    # Break Down and Test !!!!!
     def select_card_strategy_1(self, prize_value):
         # if prize_value < 7, select near min value vard.
         # else select card close to prize value.
@@ -130,6 +129,8 @@ class Hand(SuitCards):
         if prize_value < 7:
             card_indexes = np.argsort(card_weight)
         else:
+            if prize_value > 13:
+                prize_value = 13
             card_weight = np.abs(np.asarray(card_weight) - prize_value)
             # bias towards higher values
             low_slice = list(range(2*prize_value - (self.card_count() + 1), prize_value-1))
@@ -143,7 +144,6 @@ class Hand(SuitCards):
         return self._order.pop(card_loc)
 
     def select_card(self, suit, val):
-
         in_stack, card_loc = self.card_in_stack(suit, val)
         if in_stack:
             return self._order.pop(card_loc)
