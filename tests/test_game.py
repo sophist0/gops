@@ -172,9 +172,7 @@ def test_AIAIGame(mocker):
 def test_AIHumanGame(mocker):
     human_game = AIHumanGame()
     v = io.StringIO("\r")
-    # s = list(map(io.StringIO, ["A","2","3","4","5","6","7","8","9","10","J","Q","K"]))
     s = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"]
-
     print(type(s[0]))
     inputs = []
     for x in range(len(s)):

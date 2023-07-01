@@ -175,7 +175,12 @@ class GameBase():
         print(ui.TAB1 + "Player_1 score: {}".format(self.player_1.score()))
         print(ui.TAB1 + "Player_2 score: {}".format(self.player_2.score()))
 
-# Untested, FIX
+    def wait_to_reset(self):
+        print()
+        input("Continue.....")
+        if reset:
+            os.system("reset")
+
 class AIAIGame(GameBase):
     def __init__(self):
         player_1 = AIPlayer(Hand("Hearts"))
@@ -199,16 +204,11 @@ class AIAIGame(GameBase):
             self.play_area.award_points(self.player_1, self.player_2)
             self.display_score()
 
-            # wait
-            print()
-            input("Continue.....")
-            if reset:
-                os.system("reset")
+            self.wait_to_reset()
 
         self.decide_winner()
         self.final_msg()
 
-# Untested
 class AIHumanGame(GameBase):
     def __init__(self):
         player_1 = AIPlayer(Hand("Hearts"))
@@ -233,11 +233,7 @@ class AIHumanGame(GameBase):
             self.play_area.award_points(self.player_1, self.player_2)
             self.display_score()
 
-            # wait
-            print()
-            input("Continue.....")
-            if reset:
-                os.system("reset")
+            self.wait_to_reset()
 
         self.decide_winner()
         self.final_msg()
