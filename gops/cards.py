@@ -124,6 +124,7 @@ class Hand(SuitCards):
     def select_card_strategy_1(self, prize_value):
         # if prize_value < 7, select near min value vard.
         # else select card close to prize value.
+        # TODO: Alg. assumes cards are sorted. Should check this!
         card_weight = self.get_card_nvals() 
         prob = self.card_count()
         if prize_value < 7:
@@ -139,8 +140,17 @@ class Hand(SuitCards):
 
             card_indexes = np.argsort(card_weight)
 
+        print()
+        print("prize_value: ",prize_value)
+        print(card_weight)
+        print()
         index = self.select_index()
-        card_loc = card_indexes[index]       
+        card_loc = card_indexes[index]
+
+        # if prize is high and playing a lower value card, play the lowest value.
+        if (prize_value >= 7) and (card_loc < (prize_value - 1)):
+            card_loc = 0 
+
         return self._order.pop(card_loc)
 
     def select_card(self, suit, val):
