@@ -28,9 +28,14 @@ class AIPlayer(Player):
         Player.__init__(self, hand)
         self._difficulty = difficulty
 
-    def play_card(self):
+    def play_card(self, prize_value):
         if self._difficulty == 1:
             return self._hand.select_random_card()
+        elif self._difficulty == 2:
+            return self._hand.select_card_strategy_1(prize_value)
+
+    def set_difficulty(self, difficulty):
+        self._difficulty = difficulty
 
 class HumanPlayer(Player):
     def __init__(self, hand):
@@ -198,8 +203,8 @@ class AIAIGame(GameBase):
             self.play_area.flip_prize(prize)
             self.play_area.display_pizes()
 
-            player_1_card = self.player_1.play_card()
-            player_2_card = self.player_2.play_card()
+            player_1_card = self.player_1.play_card(self.play_area.prize_value())
+            player_2_card = self.player_2.play_card(self.play_area.prize_value())
 
             self.play_area.flip_cards(player_1_card, player_2_card)
             self.play_area.display_cards()
@@ -219,6 +224,18 @@ class AIHumanGame(GameBase):
         GameBase.__init__(self, player_1, player_2, reset)
 
     def run_game(self):
+        print()
+        difficulty = None
+        while difficulty is None:
+            selected = input("Select AI difficulty [1, 2]: ")
+            if selected not in ["1","2"]:
+                print("Invalid selection.")
+                print()
+            else:
+                difficulty = int(selected)
+        print()
+        self.player_1.set_difficulty(difficulty)
+
         while not self.game_over():
             self.play_area.print_round()
             self.player_2.show_hand()
@@ -227,7 +244,7 @@ class AIHumanGame(GameBase):
             self.play_area.flip_prize(prize)
             self.play_area.display_pizes()
 
-            player_1_card = self.player_1.play_card()
+            player_1_card = self.player_1.play_card(self.play_area.prize_value())
             player_2_card = self.player_2.play_card()
 
             self.play_area.flip_cards(player_1_card, player_2_card)
