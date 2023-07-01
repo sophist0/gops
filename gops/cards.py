@@ -1,4 +1,5 @@
 import random
+import numpy as np
 
 import gops.ui_elements as ui
 
@@ -49,9 +50,14 @@ class CardStack():
     def shuffle(self):
         random.shuffle(self._order)
 
-    # untested
     def sort_cards(self, ace="Low"):
         self._order = sorted(self._order, key=lambda x: x.nval)
+
+    def get_card_nvals(self):
+        nvals = []
+        for card in self._order:
+            nvals.append(card.nval)
+        return nvals
 
     def empty(self):
         if self.card_count() == 0:
@@ -94,6 +100,50 @@ class Hand(SuitCards):
         selected = random.choice(range(self.card_count()))
 
         return self._order.pop(selected)
+
+    def select_index(self, n_cards):
+
+        # construct distribution
+        card_prob = np.asarray([0 for x in range(n_cards)])
+        for x in range(n_cards):
+            card_prob[x] = prob
+            prob -= (prob / 2) 
+        card_prob = card_prob / sum(card_prob)
+
+        # select index based on distribution
+        r = random.random()
+        s = 0
+        for x in range(n_cards):
+            s += card_prob[x]
+            if r <= s:
+                return x
+
+    # Break Down and Test !!!!!
+    def select_card_strategy_1(self, prize_value):
+        # if prize_value < 7, select near min value vard.
+        # else select card close to prize value.
+        card_weight = self.get_card_nvals() 
+        n_cards = len(card_nvals)
+
+        prob = n_cards
+        if prize_value < 7:
+
+            # get sorted indexes to map back
+            card_indexes = np.argsort(card_weight)
+            # card_weight.sort()        
+
+       else:
+            card_weight = np.asarray(card_weight) - price_value
+
+            # get sorted indexes to map back
+            card_indexes = np.argsort(card_weight)
+            # card_weight.sort()
+
+        index = self.select_index()
+        card_loc = card_indexes[index]       
+
+        return self._order.pop(card_loc)
+
 
     def select_card(self, suit, val):
 
