@@ -98,8 +98,14 @@ class Hand(SuitCards):
 
     def select_random_card(self):
         selected = random.choice(range(self.card_count()))
-
         return self._order.pop(selected)
+
+    def max_value(self):
+        m = -1
+        for card in self._order:
+            if card.nval > m:
+                m = card.nval
+        return m
 
     def get_dist(self):
         # construct distribution
@@ -107,7 +113,7 @@ class Hand(SuitCards):
         prob = self.card_count()
         for x in range(self.card_count()):
             card_prob[x] = prob
-            prob -= (prob / 3) 
+            prob -= (prob / 2) 
         return card_prob / sum(card_prob)
 
 
@@ -132,24 +138,43 @@ class Hand(SuitCards):
         else:
             if prize_value > 13:
                 prize_value = 13
-            card_weight = np.abs(np.asarray(card_weight) - prize_value)
+            card_weight = list(np.abs(np.asarray(card_weight) - prize_value))
             # bias towards higher values
-            low_slice = list(range(2*prize_value - (self.card_count() + 1), prize_value-1))
-            card_weight = card_weight.astype(float)
-            card_weight[low_slice] += 0.1
+            for idx, card in enumerate(self._order):
+                if card.nval < prize_value:
+                    card_weight[idx] = card_weight[idx] + 0.1
 
             card_indexes = np.argsort(card_weight)
 
-        print()
-        print("prize_value: ",prize_value)
-        print(card_weight)
-        print()
+        # I need to add logging
+        # values = []
+        # for card in self._order:
+        #     values.append(card.value())
+        # print()
+        # print("prize_value: ",prize_value)
+        # print("hand value")
+        # print(values)
+        # print("card_weight")
+        # print(card_weight)
+        # print()
+        # print("card_indexes")
+        # print(card_indexes)
+        # print()
+
         index = self.select_index()
+        # print("index: ",index)
+        # print()
         card_loc = card_indexes[index]
+        # print("card_loc_1: ",card_loc)
 
         # if prize is high and playing a lower value card, play the lowest value.
-        if (prize_value >= 7) and (card_loc < (prize_value - 1)):
+        # unless the value select is the maximum card value in the hand
+        card_value = self._order[card_loc].nval
+        if (prize_value >= 7) and (card_value < prize_value) and (card_value != self.max_value()):
             card_loc = 0 
+
+        # print("card_loc_2: ",card_loc)
+        # print()
 
         return self._order.pop(card_loc)
 
