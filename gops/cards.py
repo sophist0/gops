@@ -132,7 +132,7 @@ class Hand(SuitCards):
             card_indexes = np.argsort(card_weight)
             # card_weight.sort()        
 
-       else:
+        else:
             card_weight = np.asarray(card_weight) - price_value
 
             # get sorted indexes to map back
