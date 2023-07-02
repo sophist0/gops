@@ -187,7 +187,8 @@ class GameBase():
         print()
         input("Continue.....")
         if self.reset:
-            os.system("reset")
+            # os.system("reset")
+            os.system("clear")
 
 class AIAIGame(GameBase):
     def __init__(self, reset=True):
