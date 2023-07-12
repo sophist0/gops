@@ -122,8 +122,9 @@ def test_PlayArea():
     assert prize_string == "| A Spades | 9 Spades |"
 
 def test_GameBase():
-    player_1 = AIPlayer("Hearts")
-    player_2 = AIPlayer("Spades")
+
+    # case 1
+    _, _, player_1, player_2 = setup_AIAI_game()
     game_1 = GameBase(player_1, player_2)
     assert isinstance(game_1.prize_deck, SuitCards)
     assert isinstance(game_1.player_1, Player)
@@ -135,13 +136,14 @@ def test_GameBase():
         game_1.prize_deck.draw()
     assert game_1.game_over() == True
 
+    # case 2
     game_2 = GameBase(player_1, player_2)
     assert game_2.game_over() == False
     game_2.player_1.quit()
     assert game_2.game_over() == True
 
-    player_3 = AIPlayer("Hearts")
-    player_4 = AIPlayer("Spades") 
+    # case 3
+    _, _, player_3, player_4 = setup_AIAI_game()
     game_3 = GameBase(player_3, player_4)
     assert game_3.game_over() == False
     game_3.player_2.quit()
