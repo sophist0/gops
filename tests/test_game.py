@@ -20,7 +20,7 @@ def test_Player():
 def test_AIPlayer():
    hand = Hand("Hearts")
    player = AIPlayer(hand)
-   card = player.play_card()
+   card = player.play_card(1)
 
    assert isinstance(card, Card)
    assert card.suit() == "Hearts"
@@ -53,16 +53,16 @@ def test_PlayArea():
     assert play_area_1.round == 0
 
     # round 1
+    prize_deck = SuitCards("Clubs")
+    prize_card_1 = prize_deck.draw()
+
     player_1_hand = Hand("Hearts")
     player_1 = AIPlayer(player_1_hand)
-    card_1 = player_1.play_card()
+    card_1 = player_1.play_card(prize_card_1.value)
 
     player_2_hand = Hand("Spades")
     player_2 = AIPlayer(player_2_hand)
-    card_2 = player_2.play_card()
-
-    prize_deck = SuitCards("Clubs")
-    prize_card_1 = prize_deck.draw()
+    card_2 = player_2.play_card(prize_card_1.value)
 
     play_area_1.flip_prize(prize_card_1)
     play_area_1.flip_cards(card_1, card_2)
@@ -79,12 +79,13 @@ def test_PlayArea():
     assert play_area_1.round == 1
 
     # round 2
-    card_1 = player_1.play_card()
-    card_2 = player_2.play_card()
-
     prize_card_2 = prize_deck.draw()
-
     play_area_1.flip_prize(prize_card_2)
+
+    prize_value = play_area_1.prize_value()
+    card_1 = player_1.play_card(prize_value)
+    card_2 = player_2.play_card(prize_value)
+
     play_area_1.flip_cards(card_1, card_2)
 
     assert (prize_card_1.nval + prize_card_2.nval) == play_area_1.prize_value()
@@ -94,11 +95,11 @@ def test_PlayArea():
 
     player_1_hand = Hand("Hearts")
     player_1 = AIPlayer(player_1_hand)
-    card_1 = player_1.play_card()
+    card_1 = player_1.play_card(1)
 
     player_2_hand = Hand("Spades")
     player_2 = AIPlayer(player_2_hand)
-    card_2 = player_2.play_card()
+    card_2 = player_2.play_card(1)
 
     prize_deck = SuitCards("Clubs")
     prize_card_1 = prize_deck.draw()
@@ -113,11 +114,12 @@ def test_PlayArea():
     play_area_2.print_round()
 
     # test prize string
+    play_area_3 = PlayArea()
     card_3 = Card("Spades", "A")
     card_4 = Card("Spades", "9")
-    play_area_2.flip_prize(card_3)
-    play_area_2.flip_prize(card_4)
-    prize_string = play_area_2.get_prize_string()
+    play_area_3.flip_prize(card_3)
+    play_area_3.flip_prize(card_4)
+    prize_string = play_area_3.get_prize_string()
     assert prize_string == "| A Spades | 9 Spades |"
 
     # would be better to trigger individual cases
@@ -132,7 +134,6 @@ def test_PlayArea():
         assert player_2.score() == 0
 
 def test_GameBase():
-
     player_1 = AIPlayer("Hearts")
     player_2 = AIPlayer("Spades")
     game_1 = GameBase(player_1, player_2)
@@ -160,7 +161,6 @@ def test_GameBase():
 
     game_1.display_score()
 
-# Need to test AIAIGame
 def test_AIAIGame(mocker):
     ai_game = AIAIGame(reset=False)
     v = io.StringIO("\r")
@@ -168,11 +168,10 @@ def test_AIAIGame(mocker):
     mocker.patch("builtins.input", side_effect=inputs)
     ai_game.run_game()
 
-# Need to test AIHumanGame
 def test_AIHumanGame(mocker):
     human_game = AIHumanGame(reset=False)
     v = io.StringIO("\r")
-    s = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"]
+    s = ["1","A","2","3","4","5","6","7","8","9","10","J","Q","K"]
     print(type(s[0]))
     inputs = []
     for x in range(len(s)):

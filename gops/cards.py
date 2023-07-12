@@ -116,7 +116,6 @@ class Hand(SuitCards):
             prob -= (prob / 2) 
         return card_prob / sum(card_prob)
 
-
     def select_index(self):
         # select index based on distribution
         card_prob = self.get_dist()
