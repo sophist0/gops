@@ -43,29 +43,38 @@ def test_HumanPlayer(monkeypatch):
 
     player.show_hand()
 
+def setup_AIAI_game():
+
+    play_area_1 = PlayArea()
+    prize_deck = SuitCards("Clubs")
+    player_1 = AIPlayer(Hand("Hearts"))
+    player_2 = AIPlayer(Hand("Spades"))
+
+    return [play_area_1, prize_deck, player_1, player_2]
+
+def run_round(play_area, prize_deck, player_1, player_2):
+
+    prize_card = prize_deck.draw()
+    card_1 = player_1.play_card(prize_card.value)
+    card_2 = player_2.play_card(prize_card.value)
+
+    play_area.flip_prize(prize_card)
+    play_area.flip_cards(card_1, card_2)
+
+    return play_area, prize_card, card_1, card_2, prize_card
+
 def test_PlayArea():
 
-    # round 0
+    # round 0, null case
     play_area_1 = PlayArea()
     assert play_area_1.player_1_card == None
     assert play_area_1.player_2_card == None
     assert play_area_1.prize_cards == []
     assert play_area_1.round == 0
 
-    # round 1
-    prize_deck = SuitCards("Clubs")
-    prize_card_1 = prize_deck.draw()
-
-    player_1_hand = Hand("Hearts")
-    player_1 = AIPlayer(player_1_hand)
-    card_1 = player_1.play_card(prize_card_1.value)
-
-    player_2_hand = Hand("Spades")
-    player_2 = AIPlayer(player_2_hand)
-    card_2 = player_2.play_card(prize_card_1.value)
-
-    play_area_1.flip_prize(prize_card_1)
-    play_area_1.flip_cards(card_1, card_2)
+    # round 1, normal case
+    play_area_1, prize_deck, player_1, player_2 = setup_AIAI_game()
+    play_area_1, prize_card_1, _, _, _ = run_round(play_area_1, prize_deck, player_1, player_2)
 
     assert isinstance(play_area_1.player_1_card, Card)
     assert play_area_1.player_1_card.suit() == "Hearts"
@@ -78,34 +87,13 @@ def test_PlayArea():
 
     assert play_area_1.round == 1
 
-    # round 2
-    prize_card_2 = prize_deck.draw()
-    play_area_1.flip_prize(prize_card_2)
-
-    prize_value = play_area_1.prize_value()
-    card_1 = player_1.play_card(prize_value)
-    card_2 = player_2.play_card(prize_value)
-
-    play_area_1.flip_cards(card_1, card_2)
-
+    # round 2, prize values added case
+    play_area_1, prize_card_2, _, _, _ = run_round(play_area_1, prize_deck, player_1, player_2)
     assert (prize_card_1.nval + prize_card_2.nval) == play_area_1.prize_value()
 
     # test award_points
-    play_area_2 = PlayArea()
-
-    player_1_hand = Hand("Hearts")
-    player_1 = AIPlayer(player_1_hand)
-    card_1 = player_1.play_card(1)
-
-    player_2_hand = Hand("Spades")
-    player_2 = AIPlayer(player_2_hand)
-    card_2 = player_2.play_card(1)
-
-    prize_deck = SuitCards("Clubs")
-    prize_card_1 = prize_deck.draw()
-
-    play_area_2.flip_prize(prize_card_1)
-    play_area_2.flip_cards(card_1, card_2)
+    play_area_2, prize_deck, player_1, player_2 = setup_AIAI_game()
+    play_area_2, _, card_1, card_2, prize_card_2 = run_round(play_area_2, prize_deck, player_1, player_2)
 
     play_area_2.display_pizes()
     play_area_2.display_cards()
@@ -113,7 +101,18 @@ def test_PlayArea():
     play_area_2.award_points(player_1, player_2)
     play_area_2.print_round()
 
-    # test prize string
+    # would be better to trigger individual cases
+    if card_1.nval > card_2.nval:
+        assert player_1.score() == prize_card_2.nval
+        assert player_2.score() == 0
+    elif card_2.nval > card_1.nval:
+        assert player_2.score() == prize_card_2.nval
+        assert player_1.score() == 0
+    else:
+        assert player_1.score() == 0
+        assert player_2.score() == 0
+
+    # prize string case
     play_area_3 = PlayArea()
     card_3 = Card("Spades", "A")
     card_4 = Card("Spades", "9")
@@ -121,17 +120,6 @@ def test_PlayArea():
     play_area_3.flip_prize(card_4)
     prize_string = play_area_3.get_prize_string()
     assert prize_string == "| A Spades | 9 Spades |"
-
-    # would be better to trigger individual cases
-    if card_1.nval > card_2.nval:
-        assert player_1.score() == prize_card_1.nval
-        assert player_2.score() == 0
-    elif card_2.nval > card_1.nval:
-        assert player_2.score() == prize_card_1.nval
-        assert player_1.score() == 0
-    else:
-        assert player_1.score() == 0
-        assert player_2.score() == 0
 
 def test_GameBase():
     player_1 = AIPlayer("Hearts")
