@@ -1,44 +1,47 @@
 import random
 import os
 import time
+from typing import Union
 
 import gops.ui_elements as ui
-from gops.cards import SuitCards, Hand
+from gops.cards import SuitCards, Hand, Card
 
 class Player():
-    def __init__(self, hand):
+    def __init__(self, hand: Hand):
         self._hand = hand
         self._score = 0
         self._quit = False
 
-    def accept_points(self, points):
+    def accept_points(self, points: int):
         self._score += points
 
-    def score(self):
+    def score(self) -> int:
         return self._score
 
     def quit(self):
         self._quit = True
 
-    def quit_value(self):
+    def quit_value(self) -> bool:
         return self._quit
 
 class AIPlayer(Player):
-    def __init__(self, hand, difficulty=1):
+    def __init__(self, hand: Hand, difficulty: int=1):
         Player.__init__(self, hand)
         self._difficulty = difficulty
 
-    def play_card(self, prize_value):
+    def play_card(self, prize_value: int) -> Card:
         if self._difficulty == 1:
             return self._hand.select_random_card()
         elif self._difficulty == 2:
             return self._hand.select_card_strategy_1(prize_value)
 
-    def set_difficulty(self, difficulty):
+    def set_difficulty(self, difficulty: int):
+        if difficulty not in [1, 2]:
+            raise Exception("Bad difficulty.")
         self._difficulty = difficulty
 
 class HumanPlayer(Player):
-    def __init__(self, hand):
+    def __init__(self, hand: Hand):
         Player.__init__(self, hand)
 
         # move somewhere more general
@@ -48,7 +51,7 @@ class HumanPlayer(Player):
     def show_hand(self):
         self._hand.display_cards()
 
-    def play_card(self):
+    def play_card(self) -> Card:
         card = None
         while card is None:
             print()
@@ -73,10 +76,10 @@ class PlayArea():
         print("Round: ", self.round) 
         print(ui.DIVIDER)
 
-    def flip_prize(self, prize):
+    def flip_prize(self, prize: int):
         self.prize_cards.append(prize)
 
-    def flip_cards(self, card_1, card_2):
+    def flip_cards(self, card_1: Card, card_2: Card):
         self.player_1_card = card_1
         self.player_2_card = card_2
         self.round += 1
@@ -89,7 +92,7 @@ class PlayArea():
             prize_string += "{} {} {} {}".format(ui.VERT, prize.value(), prize.suit(), ui.VERT)
         return prize_string
 
-    def prize_winner(self, winner):
+    def prize_winner(self, winner: Union[str, None]):
         if winner == None:
             print("Tie no prizes awarded.")
         else:
@@ -113,7 +116,7 @@ class PlayArea():
         return total
 
     # move to Game class?
-    def award_points(self, player_1, player_2):
+    def award_points(self, player_1: Player, player_2: Player):
         if self.player_1_card.nval > self.player_2_card.nval:
             player_1.accept_points(self.prize_value())
             self.prize_winner("Player 1")
@@ -136,7 +139,7 @@ class PlayArea():
         self.prize_cards = []
 
 class GameBase():
-    def __init__(self, player_1, player_2, reset=True):
+    def __init__(self, player_1: Player, player_2: Player, reset: bool=True):
         self.prize_deck = None
         self.reset = reset
         self.player_1 = player_1
@@ -187,11 +190,10 @@ class GameBase():
         print()
         input("Continue.....")
         if self.reset:
-            # os.system("reset")
             os.system("clear")
 
 class AIAIGame(GameBase):
-    def __init__(self, reset=True):
+    def __init__(self, reset: bool=True):
         player_1 = AIPlayer(Hand("Hearts"))
         player_2 = AIPlayer(Hand("Spades"))
         GameBase.__init__(self, player_1, player_2, reset)
