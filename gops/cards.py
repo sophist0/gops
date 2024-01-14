@@ -1,17 +1,18 @@
 import random
 import numpy as np
+from typing import List, Tuple, Union
 
 import gops.ui_elements as ui
 
 class Card():
-    def __init__(self, suit, val):
+    def __init__(self, suit: str, val: Union[str, int]):
         self.ace="low"
         self._suit = suit
         self._val = val
         self.nval = self.get_num_value()
 
     # Move this to the card suit class
-    def get_num_value(self):
+    def get_num_value(self) -> Union[int, None]:
         if isinstance(self._val, int):
             return int(self._val)
         elif self._val == "J":
@@ -27,10 +28,10 @@ class Card():
         else:
             return None
 
-    def value(self):
+    def value(self) -> Union[int, str]:
         return self._val
 
-    def suit(self):
+    def suit(self) -> str:
         return self._suit
 
     def display(self):
@@ -38,9 +39,14 @@ class Card():
 
 class CardStack():
     def __init__(self, cards):
+        self.card_suits = ["Hearts", "Spades", "Clubs", "Diamonds"]
+        self.card_values = [2,3,4,5,6,7,8,9,10,"J","Q","K","A"]
         self._order = cards
 
-    def card_count(self):
+    def add_cards(self, cards: List[Card]):
+        self._order = cards
+
+    def card_count(self) -> int:
         return len(self._order)
 
     def display_cards(self):
@@ -50,22 +56,27 @@ class CardStack():
     def shuffle(self):
         random.shuffle(self._order)
 
-    def sort_cards(self, ace="Low"):
+    def sort_cards(self):
         self._order = sorted(self._order, key=lambda x: x.nval)
 
-    def get_card_nvals(self):
+    def get_card_nvals(self) -> List[int]:
         nvals = []
         for card in self._order:
             nvals.append(card.nval)
         return nvals
 
-    def empty(self):
+    def empty(self) -> bool:
         if self.card_count() == 0:
             return True
         else:
             return False
 
-    def card_in_stack(self, suit, val):
+    def card_in_stack(self, suit: str, val: int) -> Tuple[bool, int]:
+        if suit not in self.card_suits:
+            raise Exception("Bad card suit.")
+        if val not in self.card_values:
+            raise Exception("Bad card value.")
+
         in_stack = False
         card_loc = -1
         for card in self._order:
@@ -76,38 +87,41 @@ class CardStack():
         return in_stack, -1
 
 class SuitCards(CardStack):
-    def __init__(self, suit):
-        values = [2,3,4,5,6,7,8,9,10,"J","Q","K","A"]
+    def __init__(self, suit: str):
         self.suit = suit
-
         cards = []
-        for value in values:
+        CardStack.__init__(self, cards)
+
+        if self.suit not in self.card_suits:
+            raise Exception("Bad card suit.")
+
+        for value in self.card_values:
             card = Card(suit, value)
             cards.append(card)
+        self.add_cards(cards)
 
-        CardStack.__init__(self, cards)
         random.shuffle(self._order)
 
-    def draw(self):
+    def draw(self) -> Card:
         return self._order.pop(0)
 
 class Hand(SuitCards):
-    def __init__(self, suit):
+    def __init__(self, suit: str):
         SuitCards.__init__(self, suit)
         self.sort_cards()
 
-    def select_random_card(self):
+    def select_random_card(self) -> Card:
         selected = random.choice(range(self.card_count()))
         return self._order.pop(selected)
 
-    def max_value(self):
+    def max_value(self) -> int:
         m = -1
         for card in self._order:
             if card.nval > m:
                 m = card.nval
         return m
 
-    def get_dist(self):
+    def get_dist(self) -> float:
         # construct distribution
         card_prob = np.asarray([0 for x in range(self.card_count())])
         prob = self.card_count()
@@ -116,7 +130,7 @@ class Hand(SuitCards):
             prob -= (prob / 2) 
         return card_prob / sum(card_prob)
 
-    def select_index(self):
+    def select_index(self) -> int:
         # select index based on distribution
         card_prob = self.get_dist()
         r = random.random()
@@ -126,7 +140,7 @@ class Hand(SuitCards):
             if r <= s:
                 return x
 
-    def select_card_strategy_1(self, prize_value):
+    def select_card_strategy_1(self, prize_value) -> Card:
         # if prize_value < 7, select near min value vard.
         # else select card close to prize value.
         # TODO: Alg. assumes cards are sorted. Should check this!
@@ -145,26 +159,8 @@ class Hand(SuitCards):
 
             card_indexes = np.argsort(card_weight)
 
-        # I need to add logging
-        # values = []
-        # for card in self._order:
-        #     values.append(card.value())
-        # print()
-        # print("prize_value: ",prize_value)
-        # print("hand value")
-        # print(values)
-        # print("card_weight")
-        # print(card_weight)
-        # print()
-        # print("card_indexes")
-        # print(card_indexes)
-        # print()
-
         index = self.select_index()
-        # print("index: ",index)
-        # print()
         card_loc = card_indexes[index]
-        # print("card_loc_1: ",card_loc)
 
         # if prize is high and playing a lower value card, play the lowest value.
         # unless the value select is the maximum card value in the hand
@@ -172,12 +168,9 @@ class Hand(SuitCards):
         if (prize_value >= 7) and (card_value < prize_value) and (card_value != self.max_value()):
             card_loc = 0 
 
-        # print("card_loc_2: ",card_loc)
-        # print()
-
         return self._order.pop(card_loc)
 
-    def select_card(self, suit, val):
+    def select_card(self, suit: str, val: int) -> Union[int, None]:
         in_stack, card_loc = self.card_in_stack(suit, val)
         if in_stack:
             return self._order.pop(card_loc)

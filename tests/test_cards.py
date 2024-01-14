@@ -40,7 +40,7 @@ def test_CardStack():
     assert stack_2.empty()
 
     # test card in stack
-    in_stack, card_loc = stack_1.card_in_stack("Spade", "A")
+    in_stack, card_loc = stack_1.card_in_stack("Spades", "A")
     assert in_stack == False
     assert card_loc == -1
 
@@ -76,7 +76,7 @@ def test_Hand():
     hand = Hand("Clubs")
 
     # test select card
-    card = hand.select_card("Spade", 2)
+    card = hand.select_card("Spades", 2)
     assert card == None
 
     card = hand.select_card("Clubs", 2)
