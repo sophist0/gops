@@ -3,27 +3,30 @@ import io
 from gops.game import Player, AIPlayer, HumanPlayer, PlayArea, GameBase, AIAIGame, AIHumanGame
 from gops.cards import Card, SuitCards, Hand
 
+
 def test_Player():
-   hand = Hand("Hearts")
-   player = Player(hand)
+    hand = Hand("Hearts")
+    player = Player(hand)
 
-   assert player.quit_value() == False
-   assert player.score() == 0
+    assert player.quit_value() is False
+    assert player.score() == 0
 
-   player.accept_points(1)
-   player.accept_points(1)
-   assert player.score() == 2
+    player.accept_points(1)
+    player.accept_points(1)
+    assert player.score() == 2
 
-   player.quit()
-   assert player.quit_value() == True
+    player.quit()
+    assert player.quit_value() is True
+
 
 def test_AIPlayer():
-   hand = Hand("Hearts")
-   player = AIPlayer(hand)
-   card = player.play_card(1)
+    hand = Hand("Hearts")
+    player = AIPlayer(hand)
+    card = player.play_card(1)
 
-   assert isinstance(card, Card)
-   assert card.suit() == "Hearts"
+    assert isinstance(card, Card)
+    assert card.suit() == "Hearts"
+
 
 def test_HumanPlayer(monkeypatch):
 
@@ -32,16 +35,16 @@ def test_HumanPlayer(monkeypatch):
 
     monkeypatch.setattr("sys.stdin", io.StringIO("2"))
     card = player.play_card()
-    
     assert isinstance(card, Card)
     assert card.value() == 2
     assert card.suit() == "Hearts"
 
     monkeypatch.setattr("sys.stdin", io.StringIO("k"))
-    card = player.play_card() 
+    card = player.play_card()
     assert card.value() == "K"
 
     player.show_hand()
+
 
 def setup_AIAI_game():
 
@@ -51,6 +54,7 @@ def setup_AIAI_game():
     player_2 = AIPlayer(Hand("Spades"))
 
     return [play_area_1, prize_deck, player_1, player_2]
+
 
 def run_round(play_area, prize_deck, player_1, player_2):
 
@@ -63,12 +67,13 @@ def run_round(play_area, prize_deck, player_1, player_2):
 
     return play_area, prize_card, card_1, card_2, prize_card
 
+
 def test_PlayArea():
 
     # round 0, null case
     play_area_1 = PlayArea()
-    assert play_area_1.player_1_card == None
-    assert play_area_1.player_2_card == None
+    assert play_area_1.player_1_card is None
+    assert play_area_1.player_2_card is None
     assert play_area_1.prize_cards == []
     assert play_area_1.round == 0
 
@@ -121,6 +126,7 @@ def test_PlayArea():
     prize_string = play_area_3.get_prize_string()
     assert prize_string == "| A Spades | 9 Spades |"
 
+
 def test_GameBase():
 
     # case 1
@@ -131,37 +137,39 @@ def test_GameBase():
     assert isinstance(game_1.player_2, Player)
     assert isinstance(game_1.play_area, PlayArea)
 
-    assert game_1.game_over() == False
+    assert game_1.game_over() is False
     for x in range(13):
         game_1.prize_deck.draw()
-    assert game_1.game_over() == True
+    assert game_1.game_over() is True
 
     # case 2
     game_2 = GameBase(player_1, player_2)
-    assert game_2.game_over() == False
+    assert game_2.game_over() is False
     game_2.player_1.quit()
-    assert game_2.game_over() == True
+    assert game_2.game_over() is True
 
     # case 3
     _, _, player_3, player_4 = setup_AIAI_game()
     game_3 = GameBase(player_3, player_4)
-    assert game_3.game_over() == False
+    assert game_3.game_over() is False
     game_3.player_2.quit()
-    assert game_3.game_over() == True
+    assert game_3.game_over() is True
 
     game_1.display_score()
+
 
 def test_AIAIGame(mocker):
     ai_game = AIAIGame(reset=False)
     v = io.StringIO("\r")
-    inputs = [v,v,v,v,v,v,v,v,v,v,v,v,v]
+    inputs = [v, v, v, v, v, v, v, v, v, v, v, v, v]
     mocker.patch("builtins.input", side_effect=inputs)
     ai_game.run_game()
+
 
 def test_AIHumanGame(mocker):
     human_game = AIHumanGame(reset=False)
     v = io.StringIO("\r")
-    s = ["1","A","2","3","4","5","6","7","8","9","10","J","Q","K"]
+    s = ["1", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
     print(type(s[0]))
     inputs = []
     for x in range(len(s)):
