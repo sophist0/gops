@@ -70,6 +70,7 @@ def test_SuitCards():
 
     suit = SuitCards("Clubs")
     assert suit.card_count() == 13
+    suit.draw()
     assert suit.card_count() == 12
 
 
