@@ -3,3 +3,8 @@ ssh login
 on connect start game client
 
 game client connects to game server via websockets.
+
+#####################################################
+
+Simple server example. Good for practicing creating an API?
+https://gist.github.com/mafayaz/faf938a896357c3a4c9d6da27edcff08
