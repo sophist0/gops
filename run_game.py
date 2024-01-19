@@ -2,7 +2,11 @@
 
 from gops.game import AIHumanGame, AIAIGame
 
-new_game = AIHumanGame()
-#new_game = AIAIGame()
+HUMAN_PLAYER = True
+
+if HUMAN_PLAYER:
+    new_game = AIHumanGame()
+else:
+    new_game = AIAIGame()
 
 new_game.run_game()
