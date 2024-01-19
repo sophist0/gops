@@ -74,8 +74,7 @@ def test_SuitCards():
     assert suit.card_count() == 12
 
 
-def test_Hand():
-
+def test_Hand_select():
     hand = Hand("Clubs")
 
     # test select card
@@ -88,6 +87,11 @@ def test_Hand():
     assert card.suit() == "Clubs"
     assert in_stack is False
     assert card_loc == -1
+
+
+def test_Hand_selectrandom():
+
+    hand = Hand("Clubs")
 
     # test select random card
     random_card = False
@@ -103,21 +107,27 @@ def test_Hand():
 
     hand.display_cards()
     for x in range(5):
-        card = hand.draw()
+        hand.draw()
     hand.display_cards()
+
+
+def test_Hand_dist():
 
     # test distribution
     hand_2 = Hand("Spades")
     dist = hand_2.get_dist()
-
     assert np.isclose(sum(dist), 1, CLOSE)
     for idx, val in enumerate(dist):
         assert val <= 1
         assert val >= 0
         if idx > 0:
-            assert dist[x-1] > dist[x]
+            assert dist[idx-1] >= dist[idx]
 
+
+def test_Hand_selectindex():
     # test select index
+    hand_2 = Hand("Spades")
+    dist = hand_2.get_dist()
     index_count = [0 for x in range(hand_2.card_count())]
     n_select = 1000
     last_index = None
@@ -138,7 +148,11 @@ def test_Hand():
         if idx > 0:
             assert dist[idx-1] >= dist[idx]
 
+
+def test_Hand_strategy1():
+
     # test select card strategy 1
+    n_select = 1000
     selected_values_7 = defaultdict(int)
     selected_values_k = defaultdict(int)
     for x in range(n_select):
