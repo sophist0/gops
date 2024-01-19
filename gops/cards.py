@@ -4,9 +4,10 @@ from typing import List, Tuple, Union
 
 import gops.ui_elements as ui
 
+
 class Card():
     def __init__(self, suit: str, val: Union[str, int]):
-        self.ace="low"
+        self.ace = "low"
         self._suit = suit
         self._val = val
         self.nval = self.get_num_value()
@@ -37,10 +38,11 @@ class Card():
     def display(self):
         print(ui.RVERT + str(self._val) + " " + self._suit + ui.LVERT)
 
+
 class CardStack():
     def __init__(self, cards):
         self.card_suits = ["Hearts", "Spades", "Clubs", "Diamonds"]
-        self.card_values = [2,3,4,5,6,7,8,9,10,"J","Q","K","A"]
+        self.card_values = [2, 3, 4, 5, 6, 7, 8, 9, 10, "J", "Q", "K", "A"]
         self._order = cards
 
     def add_cards(self, cards: List[Card]):
@@ -86,6 +88,7 @@ class CardStack():
                 return in_stack, card_loc
         return in_stack, -1
 
+
 class SuitCards(CardStack):
     def __init__(self, suit: str):
         self.suit = suit
@@ -104,6 +107,7 @@ class SuitCards(CardStack):
 
     def draw(self) -> Card:
         return self._order.pop(0)
+
 
 class Hand(SuitCards):
     def __init__(self, suit: str):
@@ -127,7 +131,7 @@ class Hand(SuitCards):
         prob = self.card_count()
         for x in range(self.card_count()):
             card_prob[x] = prob
-            prob -= (prob / 2) 
+            prob -= (prob / 2)
         return card_prob / sum(card_prob)
 
     def select_index(self) -> int:
@@ -144,8 +148,7 @@ class Hand(SuitCards):
         # if prize_value < 7, select near min value vard.
         # else select card close to prize value.
         # TODO: Alg. assumes cards are sorted. Should check this!
-        card_weight = self.get_card_nvals() 
-        prob = self.card_count()
+        card_weight = self.get_card_nvals()
         if prize_value < 7:
             card_indexes = np.argsort(card_weight)
         else:
@@ -162,11 +165,11 @@ class Hand(SuitCards):
         index = self.select_index()
         card_loc = card_indexes[index]
 
-        # if prize is high and playing a lower value card, play the lowest value.
-        # unless the value select is the maximum card value in the hand
+        # if prize is high and playing a lower value card, play the lowest
+        # value. unless the value select is the maximum card value in the hand.
         card_value = self._order[card_loc].nval
-        if (prize_value >= 7) and (card_value < prize_value) and (card_value != self.max_value()):
-            card_loc = 0 
+        if ((prize_value >= 7) and (card_value < prize_value) and (card_value != self.max_value())):
+            card_loc = 0
 
         return self._order.pop(card_loc)
 
@@ -200,4 +203,3 @@ class Hand(SuitCards):
                 card = self._order[x]
                 print(str(card.value()) + " " + card.suit(), end=ui.CVERT)
             print()
-
