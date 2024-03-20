@@ -1,4 +1,4 @@
-import os
+import os, copy
 from typing import Union
 
 import gops.ui_elements as ui
@@ -25,9 +25,10 @@ class Player():
 
 
 class AIPlayer(Player):
-    def __init__(self, hand: Hand, difficulty: int = 1):
+    def __init__(self, id, hand: Hand, difficulty: int = 1):
         Player.__init__(self, hand)
         self._difficulty = difficulty
+        self.id = id
 
     def play_card(self, prize_value: int) -> Card:
         if self._difficulty == 1:
@@ -70,6 +71,7 @@ class PlayArea():
     def __init__(self):
         self.clear()
         self.round = 0
+        self.prize_cards = []
 
     def print_round(self):
         print()
@@ -193,15 +195,136 @@ class GameBase():
     def wait_and_reset(self):
         print()
         input("Continue.....")
-        if self.reset:
-            os.system("clear")
+        print()
+        # if self.reset:
+        #     os.system("clear")
 
+# Added
+####################################################################################
+
+class PlayerTraceData():
+    def __init__(self, id, hand, score):
+        self.player_id = id
+        self.player_hand = copy.deepcopy(hand)
+        self.player_suit = hand.suit
+        self.player_score = score
+        self.prev_cards_played = self.add_prev_cards_played()
+        self.card_played = None
+
+    def add_prev_cards_played(self):
+        prev_cards_played = []
+        og_hand = Hand(self.player_suit)
+        for card in og_hand._order:
+            if self.player_hand.card_in_stack(card.suit(), card.value())[0] is False:
+                prev_cards_played.append(card)
+        return prev_cards_played    
+
+class TurnData():
+    def __init__(self, player_1_data, player_2_data, prize_cards):
+        self.player_1_data = player_1_data
+        self.player_2_data = player_2_data
+        self.prize_cards = copy.deepcopy(prize_cards)
+        self.previous_prize_cards = []
+
+    def add_prize_cards(self, previous_prizes):
+        for prize in previous_prizes:
+            self.previous_prize_cards.append(prize)
+
+
+class GameTrace():
+    def __init__(self):
+        self.turn = 1
+        self.game_trace = {}
+        self.game_winner = None
+
+    def update_trace(self, player_1, player_2, prize_cards):
+
+        player_1_data = PlayerTraceData(player_1.id, player_1._hand, player_1._score)
+        player_2_data = PlayerTraceData(player_2.id, player_2._hand, player_2._score)
+        current_turn = TurnData(player_1_data, player_2_data, prize_cards)
+
+        if self.turn > 1:
+            previous_turn = self.game_trace[self.turn-1]
+            current_turn.add_prize_cards(previous_turn.previous_prize_cards)
+
+        # update previous prizes if last round scored
+        if (self.turn > 1) and (len(prize_cards) == 1):
+            current_turn.add_prize_cards(previous_turn.prize_cards)
+
+        self.game_trace[self.turn] = current_turn
+
+    # no protection for this turn update happening at the correct time
+    def update_trace_turn(self):
+        self.turn += 1
+
+    def add_played_cards(self, player_1_card, player_2_card):
+        self.game_trace[self.turn].player_1_data.card_played = player_1_card
+        self.game_trace[self.turn].player_2_data.card_played = player_2_card
+        self.update_trace_turn()
+
+    def update_winner(self, winner):
+        self.game_winner = winner
+
+    def cards_to_values(self, cards):
+        values = []
+        if isinstance(cards, Hand):
+            for card in cards._order:
+                values.append(card.value())
+        else:
+            for card in cards:
+                values.append(card.value()) 
+        return values
+
+    def write_game_trace(self):
+        print()
+        print("#############################################################")
+        print()
+        for turn in range(1, self.turn):
+            turn_data = self.game_trace[turn]
+            print("turn: ", turn)
+            prev_prize_values = self.cards_to_values(turn_data.previous_prize_cards)
+            print("previous prizes: ", prev_prize_values)
+            current_prize_values = self.cards_to_values(turn_data.prize_cards)
+            print("current_prize_cards", current_prize_values)
+
+            print()
+            print("player 1")
+            print("player_id: ", turn_data.player_1_data.player_id) 
+            player_1_hand_values = self.cards_to_values(turn_data.player_1_data.player_hand)
+            print("player_hand: ", player_1_hand_values) 
+            print("player_suit: ", turn_data.player_1_data.player_suit) 
+            print("player_score: ", turn_data.player_1_data.player_score) 
+            player_1_prev_cards_played = self.cards_to_values(turn_data.player_1_data.prev_cards_played)
+            print("prev_cards_played: ", player_1_prev_cards_played)
+            print("card_played: ", turn_data.player_1_data.card_played.value()) 
+
+            print()
+            print("player 2")
+            print("player_id: ", turn_data.player_2_data.player_id) 
+            player_2_hand_values = self.cards_to_values(turn_data.player_2_data.player_hand)
+            print("player_hand: ", player_2_hand_values) 
+            print("player_suit: ", turn_data.player_2_data.player_suit) 
+            print("player_score: ", turn_data.player_2_data.player_score) 
+            player_2_prev_cards_played = self.cards_to_values(turn_data.player_2_data.prev_cards_played)
+            print("prev_cards_played: ", player_2_prev_cards_played)
+            print("card_played: ", turn_data.player_2_data.card_played.value()) 
+
+            print()
+            print("#############################################################")
+
+        print()
+        print("game winner: ", self.game_winner)
+        print("#############################################################")
+        print()
+
+####################################################################################
 
 class AIAIGame(GameBase):
     def __init__(self, reset: bool = True):
-        player_1 = AIPlayer(Hand("Hearts"))
-        player_2 = AIPlayer(Hand("Spades"))
+        player_1 = AIPlayer(1, Hand("Hearts"))
+        player_2 = AIPlayer(2, Hand("Spades"))
         GameBase.__init__(self, player_1, player_2, reset)
+        self.game_trace = GameTrace()
 
     def run_game(self):
         while not self.game_over():
@@ -211,8 +334,18 @@ class AIAIGame(GameBase):
             self.play_area.flip_prize(prize)
             self.play_area.display_pizes()
 
+            # Added
+            ##################
+            self.game_trace.update_trace(self.player_1, self.player_2, self.play_area.prize_cards)
+            ##################
+
             player_1_card = self.player_1.play_card(self.play_area.prize_value())
             player_2_card = self.player_2.play_card(self.play_area.prize_value())
+
+            # Added
+            ##################
+            self.game_trace.add_played_cards(player_1_card, player_2_card)
+            ##################
 
             self.play_area.flip_cards(player_1_card, player_2_card)
             self.play_area.display_cards()
@@ -224,6 +357,13 @@ class AIAIGame(GameBase):
 
         self.decide_winner()
         self.final_msg()
+
+        # Added
+        ##################
+        self.game_trace.update_winner(self.winner)
+        self.game_trace.write_game_trace()
+        ##################
+
 
 
 class AIHumanGame(GameBase):
