@@ -228,7 +228,7 @@ class AIAIGame(GameBase):
             loaded_game_trace = pickle.load(file)
             file.close()
             return loaded_game_trace
- 
+
     def generate_traces(self, trace_num):
         for x in range(trace_num):
             self.run_game(x+1)
@@ -242,18 +242,12 @@ class AIAIGame(GameBase):
             self.play_area.flip_prize(prize)
             self.play_area.display_pizes()
 
-            # Added
-            ##################
             self.game_trace.update_trace(self.player_1, self.player_2, self.play_area.prize_cards)
-            ##################
 
             player_1_card = self.player_1.play_card(self.play_area.prize_value())
             player_2_card = self.player_2.play_card(self.play_area.prize_value())
 
-            # Added
-            ##################
             self.game_trace.add_played_cards(player_1_card, player_2_card)
-            ##################
 
             self.play_area.flip_cards(player_1_card, player_2_card)
             self.play_area.display_cards()
@@ -270,7 +264,7 @@ class AIAIGame(GameBase):
         ##################
         if trace_num is not None:
             self.game_trace.update_winner(self.winner)
-            trace_path = "game_traces/p1_d" + str(self.player_1._difficulty) + "_p2_d" + str(self.player_1._difficulty) + "_trace_" + str(trace_num)
+            trace_path = "game_traces/p1_d" + str(self.player_1._difficulty) + "_p2_d" + str(self.player_2._difficulty) + "_trace_" + str(trace_num)
             self.game_trace.save_game_trace(trace_path)
             # loaded_trace = self.load_game_trace(trace_path)
             # loaded_trace.write_game_trace()
