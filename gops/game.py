@@ -1,4 +1,5 @@
 import os
+import pickle
 from typing import Union
 
 import gops.ui_elements as ui
@@ -200,19 +201,40 @@ class GameBase():
         if self.reset:
             os.system("clear")
 
-    def print_seperator(self):
-        print()
-        print("*********************************************")
-        print()
 
 class AIAIGame(GameBase):
-    def __init__(self, reset: bool = True):
+    def __init__(self, difficulty_1: int = 1, difficulty_2: int = 1, reset: bool = True):
         player_1 = AIPlayer(1, Hand("Hearts"))
+        player_1.set_difficulty(difficulty_1)
         player_2 = AIPlayer(2, Hand("Spades"))
+        player_2.set_difficulty(difficulty_2)
         GameBase.__init__(self, player_1, player_2, reset)
         self.game_trace = GameTrace()
 
-    def run_game(self):
+    def reset_game(self):
+        difficulty_1 = self.player_1._difficulty
+        difficulty_2 = self.player_2._difficulty
+
+        player_1 = AIPlayer(1, Hand("Hearts"))
+        player_1.set_difficulty(difficulty_1)
+        player_2 = AIPlayer(2, Hand("Spades"))
+        player_2.set_difficulty(difficulty_2)
+        GameBase.__init__(self, player_1, player_2, True)
+        self.game_trace = GameTrace()
+
+    def load_game_trace(self, filepath):
+        load_file = filepath + ".pkl"
+        with open(load_file, "rb") as file:
+            loaded_game_trace = pickle.load(file)
+            file.close()
+            return loaded_game_trace
+ 
+    def generate_traces(self, trace_num):
+        for x in range(trace_num):
+            self.run_game(x+1)
+            self.reset_game()
+
+    def run_game(self, trace_num=None):
         while not self.game_over():
             prize = self.prize_deck.draw()
 
@@ -240,17 +262,19 @@ class AIAIGame(GameBase):
             self.display_score()
 
             # self.wait_and_reset()
-            self.print_seperator()
 
         self.decide_winner()
         self.final_msg()
 
         # Added
         ##################
-        self.game_trace.update_winner(self.winner)
-        self.game_trace.write_game_trace()
+        if trace_num is not None:
+            self.game_trace.update_winner(self.winner)
+            trace_path = "game_traces/p1_d" + str(self.player_1._difficulty) + "_p2_d" + str(self.player_1._difficulty) + "_trace_" + str(trace_num)
+            self.game_trace.save_game_trace(trace_path)
+            # loaded_trace = self.load_game_trace(trace_path)
+            # loaded_trace.write_game_trace()
         ##################
-
 
 
 class AIHumanGame(GameBase):

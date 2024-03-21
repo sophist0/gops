@@ -9,4 +9,6 @@ if HUMAN_PLAYER:
 else:
     new_game = AIAIGame()
 
-new_game.run_game()
+# new_game.run_game()
+trace_num = 1000
+new_game.generate_traces(trace_num)

@@ -1,4 +1,4 @@
-import copy
+import copy, pickle
 
 from gops.cards import Hand
 
@@ -76,6 +76,13 @@ class GameTrace():
             for card in cards:
                 values.append(card.value())
         return values
+
+    def save_game_trace(self, filepath):
+        save_file = filepath + ".pkl"
+
+        with open(save_file, "wb") as file:
+            pickle.dump(self, file)
+            file.close()
 
     def write_game_trace(self):
         print()
