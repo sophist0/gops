@@ -174,13 +174,14 @@ class GameTrace():
 
 # Class extracts winning moves (state, played_card) pairs from the traces.
 # Here wins are defined as game wins not prize wins.
-class ExtractTraceGoodMoves():
+class ExtractTraceMoves():
     def __init__(self, tracepath, p1_difficulty, p2_difficulty):
         self.tracespath = tracepath
         self.p1_difficulty = p1_difficulty
         self.p2_difficulty = p2_difficulty
         self.traces = self.get_trace_names()
         self.good_moves = None
+        self.all_moves = None
 
     def get_trace_names(self):
         trace_pattern = "p1_d" + str(self.p1_difficulty) + "_p2_d" + str(self.p2_difficulty) + "_trace_"
@@ -193,21 +194,30 @@ class ExtractTraceGoodMoves():
             loaded_game_trace = pickle.load(file)
             file.close()
             return loaded_game_trace
-
-    
+ 
     def get_good_moves(self):
         good_moves = []
         for trace_name in self.traces:
 
             trace_data = self.load_trace(self.tracespath + "/" + trace_name)
-
-            print(trace_data)
             for turn in trace_data.game_trace:
                 turn_data = trace_data.game_trace[turn]
-                good_move = turn_data.player_game_state_to_dict(trace_data.game_winner)
-                good_moves.append(good_move)
+                if trace_data.game_winner > 0:
+                    good_move = turn_data.player_game_state_to_dict(trace_data.game_winner)
+                    good_moves.append(good_move)
         self.good_moves = good_moves
+        return self.good_moves
 
-        print()
-        print(self.good_moves)
-        print()
+    def get_all_moves(self):
+        all_moves = []
+        for trace_name in self.traces:
+
+            trace_data = self.load_trace(self.tracespath + "/" + trace_name)
+            for turn in trace_data.game_trace:
+                turn_data = trace_data.game_trace[turn]
+                player_1_move = turn_data.player_game_state_to_dict(1)
+                player_2_move = turn_data.player_game_state_to_dict(2)
+                all_moves.append(player_1_move)
+                all_moves.append(player_2_move)
+        self.all_moves = all_moves
+        return self.all_moves

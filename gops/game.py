@@ -126,15 +126,15 @@ class PlayArea():
     def award_points(self, player_1: Player, player_2: Player):
         if self.player_1_card.nval > self.player_2_card.nval:
             player_1.accept_points(self.prize_value())
-            self.prize_winner("Player 1")
+            # self.prize_winner("Player 1")
             self.clear()
         elif self.player_2_card.nval > self.player_1_card.nval:
             player_2.accept_points(self.prize_value())
-            self.prize_winner("Player 2")
+            # self.prize_winner("Player 2")
             self.clear()
         else:
             # deal with tie
-            self.prize_winner(None)
+            # self.prize_winner(None)
             self.clear_player_cards()
 
     def clear_player_cards(self):
@@ -231,6 +231,8 @@ class AIAIGame(GameBase):
 
     def generate_traces(self, trace_num):
         for x in range(trace_num):
+            if x % 100 == 0:
+                print("running game {} of {}".format(str(x+1), trace_num))
             self.run_game(x+1)
             self.reset_game()
 
@@ -238,9 +240,9 @@ class AIAIGame(GameBase):
         while not self.game_over():
             prize = self.prize_deck.draw()
 
-            self.play_area.print_round()
+            # self.play_area.print_round()
             self.play_area.flip_prize(prize)
-            self.play_area.display_pizes()
+            # self.play_area.display_pizes()
 
             self.game_trace.update_trace(self.player_1, self.player_2, self.play_area.prize_cards)
 
@@ -250,15 +252,15 @@ class AIAIGame(GameBase):
             self.game_trace.add_played_cards(player_1_card, player_2_card)
 
             self.play_area.flip_cards(player_1_card, player_2_card)
-            self.play_area.display_cards()
+            # self.play_area.display_cards()
 
             self.play_area.award_points(self.player_1, self.player_2)
-            self.display_score()
+            # self.display_score()
 
             # self.wait_and_reset()
 
         self.decide_winner()
-        self.final_msg()
+        # self.final_msg()
 
         # Added
         ##################

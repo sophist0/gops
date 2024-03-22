@@ -10,5 +10,6 @@ else:
     new_game = AIAIGame(difficulty_1=1, difficulty_2=1)
 
 # new_game.run_game()
-trace_num = 10
+# trace_num = 10000       # takes about 1 min to run with std out
+trace_num = 10000
 new_game.generate_traces(trace_num)
