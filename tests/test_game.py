@@ -22,7 +22,7 @@ def test_Player():
 def test_AIPlayer():
     hand = Hand("Hearts")
     player = AIPlayer(hand)
-    card = player.play_card(1)
+    card = player.play_card(1, hand._order[0])
 
     assert isinstance(card, Card)
     assert card.suit() == "Hearts"
@@ -59,8 +59,8 @@ def setup_AIAI_game():
 def run_round(play_area, prize_deck, player_1, player_2):
 
     prize_card = prize_deck.draw()
-    card_1 = player_1.play_card(prize_card.value)
-    card_2 = player_2.play_card(prize_card.value)
+    card_1 = player_1.play_card(prize_card.value, prize_card)
+    card_2 = player_2.play_card(prize_card.value, prize_card)
 
     play_area.flip_prize(prize_card)
     play_area.flip_cards(card_1, card_2)

@@ -32,14 +32,16 @@ class AIPlayer(Player):
         self._difficulty = difficulty
         self.id = id
 
-    def play_card(self, prize_value: int) -> Card:
+    def play_card(self, prize_value: int, prize_card: Card) -> Card:
         if self._difficulty == 1:
             return self._hand.select_random_card()
         elif self._difficulty == 2:
+            return self._hand.select_prize_card_strategy(prize_card)
+        elif self._difficulty == 3:
             return self._hand.select_card_strategy_1(prize_value)
 
     def set_difficulty(self, difficulty: int):
-        if difficulty not in [1, 2]:
+        if difficulty not in [1, 2, 3]:
             raise Exception("Bad difficulty.")
         self._difficulty = difficulty
 
@@ -246,8 +248,8 @@ class AIAIGame(GameBase):
 
             self.game_trace.update_trace(self.player_1, self.player_2, self.play_area.prize_cards)
 
-            player_1_card = self.player_1.play_card(self.play_area.prize_value())
-            player_2_card = self.player_2.play_card(self.play_area.prize_value())
+            player_1_card = self.player_1.play_card(self.play_area.prize_value(), prize)
+            player_2_card = self.player_2.play_card(self.play_area.prize_value(), prize)
 
             self.game_trace.add_played_cards(player_1_card, player_2_card)
 
@@ -283,8 +285,8 @@ class AIHumanGame(GameBase):
         print()
         difficulty = None
         while difficulty is None:
-            selected = input("Select AI difficulty [1, 2]: ")
-            if selected not in ["1", "2"]:
+            selected = input("Select AI difficulty [1, 2, 3]: ")
+            if selected not in ["1", "2", "3"]:
                 print("Invalid selection.")
                 print()
             else:
@@ -300,7 +302,7 @@ class AIHumanGame(GameBase):
             self.play_area.flip_prize(prize)
             self.play_area.display_pizes()
 
-            player_1_card = self.player_1.play_card(self.play_area.prize_value())
+            player_1_card = self.player_1.play_card(self.play_area.prize_value(), prize)
             player_2_card = self.player_2.play_card()
 
             self.play_area.flip_cards(player_1_card, player_2_card)

@@ -144,6 +144,16 @@ class Hand(SuitCards):
             if r <= s:
                 return x
 
+    def select_prize_card_strategy(self, prize_card) -> Card:
+        # selects same card as last prize card
+        card_values = self.get_card_nvals()
+        idx = 0
+        for val in card_values:
+            if val == prize_card.nval:
+                return self._order.pop(idx)
+            idx += 1
+        return None
+
     def select_card_strategy_1(self, prize_value) -> Card:
         # if prize_value < 7, select near min value vard.
         # else select card close to prize value.
