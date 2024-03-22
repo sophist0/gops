@@ -2,6 +2,7 @@
 
 import re
 import pickle
+import numpy as np
 from os import listdir
 from os.path import isfile, join
 import matplotlib.pyplot as plt
@@ -61,35 +62,55 @@ def print_all_win_stats(traces_path):
     print("Results for " + trace_pattern)
     print_win_stats(win_stats, num_traces)
 
-    # trace_pattern = "p1_d1_p2_d2_trace_"
-    # trace_files = [f for f in listdir(traces_path) if (isfile(join(traces_path, f)) and re.search(trace_pattern, f))]
-    # num_traces = len(trace_files)
-    # win_stats = get_win_stats(traces_path, trace_files)
+    trace_pattern = "p1_d1_p2_d2_trace_"
+    trace_files = [f for f in listdir(traces_path) if (isfile(join(traces_path, f)) and re.search(trace_pattern, f))]
+    num_traces = len(trace_files)
+    win_stats = get_win_stats(traces_path, trace_files)
 
-    # print()
-    # print("*****************************************************")
-    # print("Results for " + trace_pattern)
-    # print_win_stats(win_stats, num_traces)
+    print()
+    print("*****************************************************")
+    print("Results for " + trace_pattern)
+    print_win_stats(win_stats, num_traces)
 
-    # trace_pattern = "p1_d2_p2_d1_trace_"
-    # trace_files = [f for f in listdir(traces_path) if (isfile(join(traces_path, f)) and re.search(trace_pattern, f))]
-    # num_traces = len(trace_files)
-    # win_stats = get_win_stats(traces_path, trace_files)
+    trace_pattern = "p1_d1_p2_d3_trace_"
+    trace_files = [f for f in listdir(traces_path) if (isfile(join(traces_path, f)) and re.search(trace_pattern, f))]
+    num_traces = len(trace_files)
+    win_stats = get_win_stats(traces_path, trace_files)
 
-    # print()
-    # print("*****************************************************")
-    # print("Results for " + trace_pattern)
-    # print_win_stats(win_stats, num_traces)
+    print()
+    print("*****************************************************")
+    print("Results for " + trace_pattern)
+    print_win_stats(win_stats, num_traces)
 
-    # trace_pattern = "p1_d2_p2_d2_trace_"
-    # trace_files = [f for f in listdir(traces_path) if (isfile(join(traces_path, f)) and re.search(trace_pattern, f))]
-    # num_traces = len(trace_files)
-    # win_stats = get_win_stats(traces_path, trace_files)
+    trace_pattern = "p1_d2_p2_d2_trace_"
+    trace_files = [f for f in listdir(traces_path) if (isfile(join(traces_path, f)) and re.search(trace_pattern, f))]
+    num_traces = len(trace_files)
+    win_stats = get_win_stats(traces_path, trace_files)
 
-    # print()
-    # print("*****************************************************")
-    # print("Results for " + trace_pattern)
-    # print_win_stats(win_stats, num_traces)
+    print()
+    print("*****************************************************")
+    print("Results for " + trace_pattern)
+    print_win_stats(win_stats, num_traces)
+
+    trace_pattern = "p1_d2_p2_d3_trace_"
+    trace_files = [f for f in listdir(traces_path) if (isfile(join(traces_path, f)) and re.search(trace_pattern, f))]
+    num_traces = len(trace_files)
+    win_stats = get_win_stats(traces_path, trace_files)
+
+    print()
+    print("*****************************************************")
+    print("Results for " + trace_pattern)
+    print_win_stats(win_stats, num_traces)
+
+    trace_pattern = "p1_d3_p2_d3_trace_"
+    trace_files = [f for f in listdir(traces_path) if (isfile(join(traces_path, f)) and re.search(trace_pattern, f))]
+    num_traces = len(trace_files)
+    win_stats = get_win_stats(traces_path, trace_files)
+
+    print()
+    print("*****************************************************")
+    print("Results for " + trace_pattern)
+    print_win_stats(win_stats, num_traces)
 
 def prizes_to_value(prizes):
     prize_to_num = {"A":1, "2":2, "3":3, "4":4, "5":5, "6":6, "7":7, "8":8, "9":9, "10":10, "J":11, "Q":12, "K":13}
@@ -122,10 +143,11 @@ def get_count_played(moves):
     return play_count
 
 def plot_count_played(play_count, title):
-    prize_values = list(range(1,92))
+    colors = plt.cm.jet(np.linspace(0,1,13))
+    prize_values = list(range(1, 92))
     legend = []
     max_prize = 0
-    for card in play_count.keys():
+    for idx, card in enumerate(play_count.keys()):
         play_vec = []
         legend.append(card)
         for val in prize_values:
@@ -135,11 +157,14 @@ def plot_count_played(play_count, title):
             if count > 0 and val > max_prize:
                 max_prize = val
 
-        plt.plot(prize_values, play_vec)
+        plt.plot(prize_values, play_vec, color=colors[idx])
 
     plt.title(title)
+    plt.xlabel("prize values")
+    plt.ylabel("number of times card was played")
     plt.xlim([1, max_prize])
     plt.legend(legend)
+    #plt.xscale("log")
     plt.show()
 
 
@@ -147,22 +172,82 @@ def plot_count_played(play_count, title):
 ########################################################################################
 
 traces_path = "game_traces/"
+# print_all_win_stats(traces_path)
 
-print_all_win_stats(traces_path)
+########################################################################################
 
-extract = ExtractTraceMoves("game_traces", 1, 1)
-extract.get_good_moves()
-all_moves = extract.get_all_moves()
-good_moves = extract.get_good_moves()
+extract = ExtractTraceMoves(traces_path, 1, 1)
+all_moves, good_moves = extract.get_moves()
 
-# print()
-# print(all_moves)
-# print()
-
-title = "All Moves"
+title = "All Moves (1,1)"
 all_move_cnts = get_count_played(all_moves)
 plot_count_played(all_move_cnts, title)
 
-title = "Good Moves"
+title = "Good Moves (1,1)"
+good_move_cnts = get_count_played(good_moves)
+plot_count_played(good_move_cnts, title)
+
+########################################################################################
+
+extract = ExtractTraceMoves(traces_path, 1, 2)
+all_moves, good_moves = extract.get_moves()
+
+title = "All Moves (1,2)"
+all_move_cnts = get_count_played(all_moves)
+plot_count_played(all_move_cnts, title)
+
+title = "Good Moves (1,2)"
+good_move_cnts = get_count_played(good_moves)
+plot_count_played(good_move_cnts, title)
+
+########################################################################################
+
+extract = ExtractTraceMoves(traces_path, 1, 3)
+all_moves, good_moves = extract.get_moves()
+
+title = "All Moves (1,3)"
+all_move_cnts = get_count_played(all_moves)
+plot_count_played(all_move_cnts, title)
+
+title = "Good Moves (1,3)"
+good_move_cnts = get_count_played(good_moves)
+plot_count_played(good_move_cnts, title)
+
+########################################################################################
+
+extract = ExtractTraceMoves(traces_path, 2, 2)
+all_moves, good_moves = extract.get_moves()
+
+title = "All Moves (2,2)"
+all_move_cnts = get_count_played(all_moves)
+plot_count_played(all_move_cnts, title)
+
+title = "Good Moves (2,2)"
+good_move_cnts = get_count_played(good_moves)
+plot_count_played(good_move_cnts, title)
+
+########################################################################################
+
+extract = ExtractTraceMoves(traces_path, 2, 3)
+all_moves, good_moves = extract.get_moves()
+
+title = "All Moves (2,3)"
+all_move_cnts = get_count_played(all_moves)
+plot_count_played(all_move_cnts, title)
+
+title = "Good Moves (2,3)"
+good_move_cnts = get_count_played(good_moves)
+plot_count_played(good_move_cnts, title)
+
+########################################################################################
+
+extract = ExtractTraceMoves(traces_path, 3, 3)
+all_moves, good_moves = extract.get_moves()
+
+title = "All Moves (3,3)"
+all_move_cnts = get_count_played(all_moves)
+plot_count_played(all_move_cnts, title)
+
+title = "Good Moves (3,3)"
 good_move_cnts = get_count_played(good_moves)
 plot_count_played(good_move_cnts, title)

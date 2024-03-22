@@ -195,20 +195,21 @@ class ExtractTraceMoves():
             file.close()
             return loaded_game_trace
  
-    def get_good_moves(self):
+    # def get_good_moves(self):
+    #     good_moves = []
+    #     for trace_name in self.traces:
+
+    #         trace_data = self.load_trace(self.tracespath + "/" + trace_name)
+    #         for turn in trace_data.game_trace:
+    #             turn_data = trace_data.game_trace[turn]
+    #             if trace_data.game_winner > 0:
+    #                 good_move = turn_data.player_game_state_to_dict(trace_data.game_winner)
+    #                 good_moves.append(good_move)
+    #     self.good_moves = good_moves
+    #     return self.good_moves
+
+    def get_moves(self):
         good_moves = []
-        for trace_name in self.traces:
-
-            trace_data = self.load_trace(self.tracespath + "/" + trace_name)
-            for turn in trace_data.game_trace:
-                turn_data = trace_data.game_trace[turn]
-                if trace_data.game_winner > 0:
-                    good_move = turn_data.player_game_state_to_dict(trace_data.game_winner)
-                    good_moves.append(good_move)
-        self.good_moves = good_moves
-        return self.good_moves
-
-    def get_all_moves(self):
         all_moves = []
         for trace_name in self.traces:
 
@@ -219,5 +220,9 @@ class ExtractTraceMoves():
                 player_2_move = turn_data.player_game_state_to_dict(2)
                 all_moves.append(player_1_move)
                 all_moves.append(player_2_move)
+                if trace_data.game_winner > 0:
+                    good_move = turn_data.player_game_state_to_dict(trace_data.game_winner)
+                    good_moves.append(good_move)
+        self.good_moves = good_moves
         self.all_moves = all_moves
-        return self.all_moves
+        return self.all_moves, self.good_moves
