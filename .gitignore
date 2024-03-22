@@ -1,1 +1,3 @@
 *.pyc
+game_traces/
+tmp/
