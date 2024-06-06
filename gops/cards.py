@@ -1,9 +1,14 @@
+import torch
 import random
 import numpy as np
 from typing import List, Tuple, Union
 
 import gops.ui_elements as ui
 
+from model_components.inference_components import translate_greedy, translate_random
+from model_components.transformer_components import construct_vocab_transform, construct_text_transform, construct_token_transform
+
+from gops.statements import state_to_statement
 
 class Card():
     def __init__(self, suit: str, val: Union[str, int]):
@@ -40,7 +45,7 @@ class Card():
 
 
 class CardStack():
-    def __init__(self, cards):
+    def __init__(self, cards: List[Card]):
         self.card_suits = ["Hearts", "Spades", "Clubs", "Diamonds"]
         self.card_values = [2, 3, 4, 5, 6, 7, 8, 9, 10, "J", "Q", "K", "A"]
         self._order = cards
@@ -113,6 +118,8 @@ class Hand(SuitCards):
     def __init__(self, suit: str):
         SuitCards.__init__(self, suit)
         self.sort_cards()
+        self.transformer_model = None
+        self._bad_selections = 0
 
     def select_random_card(self) -> Card:
         selected = random.choice(range(self.card_count()))
@@ -182,6 +189,51 @@ class Hand(SuitCards):
             card_loc = 0
 
         return self._order.pop(card_loc)
+    
+    def select_transformer_model(self, move_data) -> Card:
+        # Need all the state info available here for the model to choose a card!
+ 
+        if self.transformer_model is None:
+
+            # load transformer model
+            NUM_EPOCHS = 7
+            model_version = 7
+            modelpath = "models/epoch_" + str(NUM_EPOCHS) + "_v" + str(model_version)
+            self.transfomer_model = torch.load(modelpath)
+
+        game_state = state_to_statement(move_data)
+
+        # Define special symbols and indices
+        STATE_LANGUAGE = 'state'
+        MOVE_LANGUAGE = 'move'
+        UNK_IDX, PAD_IDX, BOS_IDX, EOS_IDX = 0, 1, 2, 3
+        special_symbols = ['<unk>', '<pad>', '<bos>', '<eos>']
+
+        DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        token_transform = construct_token_transform(STATE_LANGUAGE, MOVE_LANGUAGE)
+
+        ##########################################################################################
+        # Load training data to get the transforms.
+        ##########################################################################################
+        with open('models/train_data_' + str(NUM_EPOCHS) + '_v' + str(model_version) + '.npy', 'rb') as f:
+            train_iter = np.load(f, allow_pickle=True)
+
+        vocab_transform = construct_vocab_transform(train_iter, STATE_LANGUAGE, MOVE_LANGUAGE, UNK_IDX, special_symbols, token_transform)
+        text_transform = construct_text_transform(token_transform, vocab_transform, STATE_LANGUAGE, MOVE_LANGUAGE, BOS_IDX, EOS_IDX)
+
+        selected_card = translate_greedy(self.transfomer_model, game_state, text_transform, vocab_transform, MOVE_LANGUAGE, STATE_LANGUAGE, BOS_IDX, DEVICE, EOS_IDX)
+        selected_val = int(selected_card.split("_")[2])
+
+        for idx, card in enumerate(self._order):
+            if card.get_num_value() == selected_val:
+                return self._order.pop(idx)
+            
+        # print()
+        # print("Error card not in hand!!!!")
+        # print("selecting random card")
+        self._bad_selections += 1
+        return self.select_random_card()
+
 
     def select_card(self, suit: str, val: int) -> Union[int, None]:
         in_stack, card_loc = self.card_in_stack(suit, val)

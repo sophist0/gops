@@ -1,0 +1,12 @@
+Generate class and package diagrams:
+
+	pyreverse -o png ..
+
+Run tests:
+
+
+-------------------------------------------------------------
+Problems saving and loading the transfomer model
+-------------------------------------------------------------
+
+There is a problem with how the transformer model is saved such that it in loading expects the same directory and file layout as when it was saved. I way around this is to save the model as a dict instead of a class object but that did not seem to work for the transformer model last time I tried it.

@@ -1,9 +1,11 @@
 import os
+import json
+import pickle
 from typing import Union
 
 import gops.ui_elements as ui
 from gops.cards import SuitCards, Hand, Card
-
+from gops.game_traces import GameTrace
 
 class Player():
     def __init__(self, hand: Hand):
@@ -25,27 +27,34 @@ class Player():
 
 
 class AIPlayer(Player):
-    def __init__(self, hand: Hand, difficulty: int = 1):
+    def __init__(self, id, hand: Hand, difficulty: int = 1):
         Player.__init__(self, hand)
         self._difficulty = difficulty
+        self.id = id
 
-    def play_card(self, prize_value: int, prize_card: Card) -> Card:
+    def play_card(self, prize_value: int, prize_card: Card, game_state) -> Card:
         if self._difficulty == 1:
             return self._hand.select_random_card()
         elif self._difficulty == 2:
             return self._hand.select_prize_card_strategy(prize_card)
         elif self._difficulty == 3:
             return self._hand.select_card_strategy_1(prize_value)
+        elif self._difficulty == 4:
+            turn_data = game_state.game_trace[game_state.turn]
+            move_data = turn_data.player_game_state_to_dict(self.id)
+            return self._hand.select_transformer_model(move_data)
+
 
     def set_difficulty(self, difficulty: int):
-        if difficulty not in [1, 2, 3]:
+        if difficulty not in [1, 2, 3, 4]:
             raise Exception("Bad difficulty.")
         self._difficulty = difficulty
 
 
 class HumanPlayer(Player):
-    def __init__(self, hand: Hand):
+    def __init__(self, id, hand: Hand):
         Player.__init__(self, hand)
+        self.id = id
 
         # move somewhere more general
         self.str_2_val = {"2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7, "8": 8, "9": 9, "10": 10,
@@ -72,6 +81,7 @@ class PlayArea():
     def __init__(self):
         self.clear()
         self.round = 0
+        self.prize_cards = []
 
     def print_round(self):
         print()
@@ -124,15 +134,12 @@ class PlayArea():
     def award_points(self, player_1: Player, player_2: Player):
         if self.player_1_card.nval > self.player_2_card.nval:
             player_1.accept_points(self.prize_value())
-            self.prize_winner("Player 1")
             self.clear()
         elif self.player_2_card.nval > self.player_1_card.nval:
             player_2.accept_points(self.prize_value())
-            self.prize_winner("Player 2")
             self.clear()
         else:
             # deal with tie
-            self.prize_winner(None)
             self.clear_player_cards()
 
     def clear_player_cards(self):
@@ -195,51 +202,105 @@ class GameBase():
     def wait_and_reset(self):
         print()
         input("Continue.....")
+        print()
         if self.reset:
             os.system("clear")
 
 
 class AIAIGame(GameBase):
-    def __init__(self, reset: bool = True):
-        player_1 = AIPlayer(Hand("Hearts"))
-        player_2 = AIPlayer(Hand("Spades"))
+    def __init__(self, difficulty_1: int = 1, difficulty_2: int = 1, reset: bool = True):
+        player_1 = AIPlayer(1, Hand("Hearts"))
+        player_1.set_difficulty(difficulty_1)
+        player_2 = AIPlayer(2, Hand("Spades"))
+        player_2.set_difficulty(difficulty_2)
         GameBase.__init__(self, player_1, player_2, reset)
+        self.game_trace = GameTrace()
 
-    def run_game(self):
+    def reset_game(self):
+        difficulty_1 = self.player_1._difficulty
+        difficulty_2 = self.player_2._difficulty
+
+        player_1 = AIPlayer(1, Hand("Hearts"))
+        player_1.set_difficulty(difficulty_1)
+        player_2 = AIPlayer(2, Hand("Spades"))
+        player_2.set_difficulty(difficulty_2)
+        GameBase.__init__(self, player_1, player_2, True)
+        self.game_trace = GameTrace()
+
+    def load_game_trace(self, filepath):
+        load_file = filepath + ".pkl"
+        with open(load_file, "rb") as file:
+            loaded_game_trace = pickle.load(file)
+            file.close()
+            return loaded_game_trace
+
+    def generate_traces(self, trace_num):
+        bad_selections = {"selections":0,"p1":0, "p2":0}
+        for x in range(trace_num):
+            if x % 10 == 0:
+                print("####################################################")
+                print("running game {} of {}".format(str(x+1), trace_num))
+                print("####################################################")
+
+            self.run_game(x+1)
+
+            bad_selections["selections"] += 13
+            bad_selections["p1"] += self.player_1._hand._bad_selections
+            bad_selections["p2"] += self.player_2._hand._bad_selections
+
+            self.reset_game()
+
+        bad_count_path = "results/p1_d" + str(self.player_1._difficulty) + "_p2_d" + str(self.player_2._difficulty) + "_bad_count.json"
+        with open(bad_count_path, "w") as file:
+            json.dump(bad_selections, file, indent = 4)
+            file.close()
+
+    def run_game(self, trace_num=None):
         while not self.game_over():
             prize = self.prize_deck.draw()
 
-            self.play_area.print_round()
             self.play_area.flip_prize(prize)
-            self.play_area.display_pizes()
+            self.game_trace.update_trace(self.player_1, self.player_2, self.play_area.prize_cards)
 
-            player_1_card = self.player_1.play_card(self.play_area.prize_value(), prize)
-            player_2_card = self.player_2.play_card(self.play_area.prize_value(), prize)
+            player_1_card = self.player_1.play_card(self.play_area.prize_value(), prize, self.game_trace)
+            player_2_card = self.player_2.play_card(self.play_area.prize_value(), prize, self.game_trace)
+
+            self.game_trace.add_played_cards(player_1_card, player_2_card)
 
             self.play_area.flip_cards(player_1_card, player_2_card)
-            self.play_area.display_cards()
-
             self.play_area.award_points(self.player_1, self.player_2)
-            self.display_score()
-
-            self.wait_and_reset()
 
         self.decide_winner()
-        self.final_msg()
+
+        ##################
+        if trace_num is not None:
+            self.game_trace.update_winner(self.winner)
+            trace_path = "game_traces/p1_d" + str(self.player_1._difficulty) + "_p2_d" + str(self.player_2._difficulty) + "_trace_" + str(trace_num)
+            self.game_trace.save_game_trace(trace_path)
+        ##################
 
 
 class AIHumanGame(GameBase):
     def __init__(self, reset=True):
-        player_1 = AIPlayer(Hand("Hearts"))
-        player_2 = HumanPlayer(Hand("Spades"))
+        player_1 = AIPlayer(1, Hand("Hearts"))
+        player_2 = HumanPlayer(2, Hand("Spades"))
         GameBase.__init__(self, player_1, player_2, reset)
+        self.game_trace = GameTrace()
 
     def run_game(self):
         print()
         difficulty = None
         while difficulty is None:
-            selected = input("Select AI difficulty [1, 2, 3]: ")
-            if selected not in ["1", "2", "3"]:
+            print()
+            print("-------------------------------------------------------")
+            print("1: Selects random card")
+            print("2: Selects same card as prize")
+            print("3: Selects random card biased toward prize value")
+            print("4: Selects card using a Transformer model")
+            print()
+
+            selected = input("Select AI difficulty [1, 2, 3, 4]: ")
+            if selected not in ["1", "2", "3", "4"]:
                 print("Invalid selection.")
                 print()
             else:
@@ -255,8 +316,12 @@ class AIHumanGame(GameBase):
             self.play_area.flip_prize(prize)
             self.play_area.display_pizes()
 
-            player_1_card = self.player_1.play_card(self.play_area.prize_value(), prize)
+            self.game_trace.update_trace(self.player_1, self.player_2, self.play_area.prize_cards)
+
+            player_1_card = self.player_1.play_card(self.play_area.prize_value(), prize, self.game_trace)
             player_2_card = self.player_2.play_card()
+
+            self.game_trace.add_played_cards(player_1_card, player_2_card)
 
             self.play_area.flip_cards(player_1_card, player_2_card)
             self.play_area.display_cards()

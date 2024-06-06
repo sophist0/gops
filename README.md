@@ -6,4 +6,4 @@ Simplest way to run is:
 
     python3 run_game.py
 
-Maybe someday I'll write a better AI or two.
+Note: Transform AI models are not currently saved in the repo. Add only after model is stable? (about 110MB per model)

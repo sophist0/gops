@@ -4,8 +4,12 @@ from collections import defaultdict
 
 from gops.cards import Card, CardStack, SuitCards, Hand
 
-CLOSE = 0.00001
+import os
+print()
+print(os.getcwd())
+print()
 
+CLOSE = 0.00001
 
 def get_values(cards):
     values = []

@@ -3,7 +3,6 @@ import io
 from gops.game import Player, AIPlayer, HumanPlayer, PlayArea, GameBase, AIAIGame, AIHumanGame
 from gops.cards import Card, SuitCards, Hand
 
-
 def test_Player():
     hand = Hand("Hearts")
     player = Player(hand)
@@ -21,8 +20,8 @@ def test_Player():
 
 def test_AIPlayer():
     hand = Hand("Hearts")
-    player = AIPlayer(hand)
-    card = player.play_card(1, hand._order[0])
+    player = AIPlayer(1, hand)
+    card = player.play_card(1, hand._order[0], None)            # TODO: pass in game state
 
     assert isinstance(card, Card)
     assert card.suit() == "Hearts"
@@ -31,7 +30,7 @@ def test_AIPlayer():
 def test_HumanPlayer(monkeypatch):
 
     hand = Hand("Hearts")
-    player = HumanPlayer(hand)
+    player = HumanPlayer(2, hand)
 
     monkeypatch.setattr("sys.stdin", io.StringIO("2"))
     card = player.play_card()
@@ -50,8 +49,8 @@ def setup_AIAI_game():
 
     play_area_1 = PlayArea()
     prize_deck = SuitCards("Clubs")
-    player_1 = AIPlayer(Hand("Hearts"))
-    player_2 = AIPlayer(Hand("Spades"))
+    player_1 = AIPlayer(1, Hand("Hearts"))
+    player_2 = AIPlayer(2, Hand("Spades"))
 
     return [play_area_1, prize_deck, player_1, player_2]
 
@@ -59,8 +58,8 @@ def setup_AIAI_game():
 def run_round(play_area, prize_deck, player_1, player_2):
 
     prize_card = prize_deck.draw()
-    card_1 = player_1.play_card(prize_card.value, prize_card)
-    card_2 = player_2.play_card(prize_card.value, prize_card)
+    card_1 = player_1.play_card(prize_card.value, prize_card, None)         # TODO: pass in game state
+    card_2 = player_2.play_card(prize_card.value, prize_card, None)         # TODO: pass in game state
 
     play_area.flip_prize(prize_card)
     play_area.flip_cards(card_1, card_2)

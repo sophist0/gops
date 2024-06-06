@@ -1,3 +1,6 @@
 *.pyc
+*.png
+*.swp
+__pycache__/
 game_traces/
 tmp/
