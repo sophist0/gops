@@ -206,6 +206,7 @@ def test_Hand_prize_card_strategy():
     assert r2.value() == "K"
     assert r3 is None
 
+
 def test_Hand_select_transformer_model():
 
     move_data = {'pre_play_data': {'own_score': '0', 
