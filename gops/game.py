@@ -192,8 +192,6 @@ class GameBase():
             print("Player 1 and Player 2 tied.")
 
     def display_score(self):
-        # print()
-        # print(ui.DIVIDER)
         print()
         print("Scores:")
         print(ui.TAB1 + "Player_1 score: {}".format(self.player_1.score()))
