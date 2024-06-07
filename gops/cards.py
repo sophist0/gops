@@ -5,10 +5,10 @@ from typing import List, Tuple, Union
 
 import gops.ui_elements as ui
 
-from model_components.inference_components import translate_greedy, translate_random
+from model_components.inference_components import translate_greedy
 from model_components.transformer_components import construct_vocab_transform, construct_text_transform, construct_token_transform
-
 from gops.statements import state_to_statement
+
 
 class Card():
     def __init__(self, suit: str, val: Union[str, int]):
@@ -189,7 +189,7 @@ class Hand(SuitCards):
             card_loc = 0
 
         return self._order.pop(card_loc)
-    
+
     def select_transformer_model(self, move_data) -> Card:
         # Need all the state info available here for the model to choose a card!
 
@@ -230,11 +230,10 @@ class Hand(SuitCards):
             if card.get_num_value() == selected_val:
                 print("AI Player card selected using a transformer model")
                 return self._order.pop(idx)
-            
+
         print("AI Player card selected randomly")
         self._bad_selections += 1
         return self.select_random_card()
-
 
     def select_card(self, suit: str, val: int) -> Union[int, None]:
         in_stack, card_loc = self.card_in_stack(suit, val)

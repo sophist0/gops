@@ -1,9 +1,11 @@
 def card_value_to_nval(vec):
-    convert_map = {"0":0, "A":1, "2":2, "3":3, "4":4, "5":5, "6":6, "7":7, "8":8, "9":9, "10":10, "J":11, "Q":12, "K":13}
+    convert_map = {"0": 0, "A": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7,
+                   "8": 8, "9": 9, "10": 10, "J": 11, "Q": 12, "K": 13}
     nvec = []
     for val in vec:
         nvec.append(convert_map[val])
     return nvec
+
 
 def hand_to_played(hand):
     deck = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
@@ -12,6 +14,7 @@ def hand_to_played(hand):
         if val not in hand:
             played.append(val)
     return played
+
 
 def state_to_statement(game_move):
     tmp_state = ""
@@ -45,7 +48,6 @@ def state_to_statement(game_move):
     score_card_word = "current_score_card_" + pval
     tmp_state += score_card_word + " "
 
-
     ppv = game_move["pre_play_data"]["previous_prize_values"]
     ppv = card_value_to_nval(ppv)
     ppv.sort()
@@ -55,14 +57,15 @@ def state_to_statement(game_move):
 
     return tmp_state
 
+
 def move_to_statement(game_move):
-    sample = {"state":"","move":""}
+    sample = {"state": "", "move": ""}
     tmp_state = state_to_statement(game_move)
 
     pc = game_move["post_play_data"]["own_played_card"]
     pc = card_value_to_nval([pc])
     played_card = "played_card_" + str(pc[0])
-    
+
     sample["state"] = tmp_state
     sample["move"] = played_card
 

@@ -25,7 +25,7 @@ class PlayerTraceData():
             if self.player_hand.card_in_stack(card.suit(), card.value())[0] is False:
                 prev_cards_played.append(card)
         return prev_cards_played
-    
+
     def play_data_to_dict(self):
         player_data = {"pre_play_data": {}, "post_play_data": {}}
 
@@ -40,6 +40,7 @@ class PlayerTraceData():
             player_data["post_play_data"]["own_played_card"] = str(self.card_played.value())
 
         return player_data
+
 
 class TurnData():
     def __init__(self, player_1_data: PlayerTraceData, player_2_data: PlayerTraceData, prize_cards):
@@ -143,10 +144,10 @@ class GameTrace():
             trace["turns"][turn] = {}
             trace["turns"][turn]["player_1_move"] = player_1_move
             trace["turns"][turn]["player_2_move"] = player_2_move
-          
+
         trace["winner"] = self.game_winner
         return trace
-    
+
     def write_game_trace(self):
         print()
         print("#############################################################")
@@ -200,7 +201,7 @@ class ExtractTraceMoves():
         self.p2_difficulty = p2_difficulty
 
         self.traces = None
-        if (self.tracespath is not None) and (self.p1_difficulty is not None) and (self.p2_difficulty is not None): 
+        if (self.tracespath is not None) and (self.p1_difficulty is not None) and (self.p2_difficulty is not None):
             self.traces = self.get_trace_names()
 
         self.good_moves = None
@@ -210,7 +211,7 @@ class ExtractTraceMoves():
         trace_pattern = "p1_d" + str(self.p1_difficulty) + "_p2_d" + str(self.p2_difficulty) + "_trace_"
         trace_files = [f for f in listdir(self.tracespath) if (isfile(join(self.tracespath, f)) and re.search(trace_pattern, f))]
         return trace_files
-    
+
     # Need to load from json now
     def load_trace(self, filepath):
         load_file = filepath
@@ -218,7 +219,7 @@ class ExtractTraceMoves():
             loaded_game_trace = json.load(file)
             file.close()
         return loaded_game_trace
- 
+
     def get_moves(self):
         good_moves = []
         all_moves = []
@@ -235,7 +236,7 @@ class ExtractTraceMoves():
                     good_moves.append(player_1_move)
                 elif trace_data["winner"] == 2:
                     good_moves.append(player_2_move)
-                   
+
         self.good_moves = good_moves
         self.all_moves = all_moves
         return self.all_moves, self.good_moves
@@ -250,7 +251,6 @@ class ExtractTraceMoves():
         df = pd.DataFrame(data, columns=["State", "Move"])
         return df
 
-    # TODO: test 
     def good_moves_and_states_to_statements(self):
         all_samples = []
         for trace_name in self.traces:
@@ -259,12 +259,12 @@ class ExtractTraceMoves():
                 turn_data = trace_data["turns"][turn]
 
                 if trace_data["winner"] == 1:
-                    good_move = turn_data["player_1_move"] 
+                    good_move = turn_data["player_1_move"]
                     sample = move_to_statement(good_move)
                     all_samples.append(sample)
 
                 if trace_data["winner"] == 2:
-                    good_move = turn_data["player_2_move"] 
+                    good_move = turn_data["player_2_move"]
                     sample = move_to_statement(good_move)
                     all_samples.append(sample)
 

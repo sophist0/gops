@@ -7,6 +7,7 @@ import gops.ui_elements as ui
 from gops.cards import SuitCards, Hand, Card
 from gops.game_traces import GameTrace
 
+
 class Player():
     def __init__(self, hand: Hand):
         self._hand = hand
@@ -43,7 +44,6 @@ class AIPlayer(Player):
             turn_data = game_state.game_trace[game_state.turn]
             move_data = turn_data.player_game_state_to_dict(self.id)
             return self._hand.select_transformer_model(move_data)
-
 
     def set_difficulty(self, difficulty: int):
         if difficulty not in [1, 2, 3, 4]:
@@ -252,7 +252,7 @@ class AIAIGame(GameBase):
 
         bad_count_path = "results/p1_d" + str(self.player_1._difficulty) + "_p2_d" + str(self.player_2._difficulty) + "_bad_count.json"
         with open(bad_count_path, "w") as file:
-            json.dump(bad_selections, file, indent = 4)
+            json.dump(bad_selections, file, indent=4)
             file.close()
 
     def run_game(self, trace_num=None):
