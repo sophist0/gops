@@ -1,5 +1,5 @@
 numpy
 pytest-mock
 pandas
-torch
-torchtext
+torch == 2.3.0
+torchtext == 0.18.0
