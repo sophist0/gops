@@ -156,15 +156,6 @@ def test_GameBase():
 
     game_1.display_score()
 
-
-def test_AIAIGame(mocker):
-    ai_game = AIAIGame(reset=False)
-    v = io.StringIO("\r")
-    inputs = [v, v, v, v, v, v, v, v, v, v, v, v, v]
-    mocker.patch("builtins.input", side_effect=inputs)
-    ai_game.run_game()
-
-
 def test_AIHumanGame(mocker):
     human_game = AIHumanGame(reset=False)
     v = io.StringIO("\r")

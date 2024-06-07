@@ -18,7 +18,6 @@ def hand_to_played(hand):
 
 def state_to_statement(game_move):
     tmp_state = ""
-
     phw = game_move["pre_play_data"]["own_hand"]
     phw = card_value_to_nval(phw)
     phw.sort()
