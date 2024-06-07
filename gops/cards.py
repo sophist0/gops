@@ -224,13 +224,13 @@ class Hand(SuitCards):
         selected_card = translate_greedy(self.transfomer_model, game_state, text_transform, vocab_transform, MOVE_LANGUAGE, STATE_LANGUAGE, BOS_IDX, DEVICE, EOS_IDX)
         selected_val = int(selected_card.split("_")[2])
 
+        print()
         for idx, card in enumerate(self._order):
             if card.get_num_value() == selected_val:
+                print("AI Player card selected using a transformer model")
                 return self._order.pop(idx)
             
-        # print()
-        # print("Error card not in hand!!!!")
-        # print("selecting random card")
+        print("AI Player card selected randomly")
         self._bad_selections += 1
         return self.select_random_card()
 

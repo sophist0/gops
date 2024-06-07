@@ -192,8 +192,8 @@ class GameBase():
             print("Player 1 and Player 2 tied.")
 
     def display_score(self):
-        print()
-        print(ui.DIVIDER)
+        # print()
+        # print(ui.DIVIDER)
         print()
         print("Scores:")
         print(ui.TAB1 + "Player_1 score: {}".format(self.player_1.score()))
@@ -310,6 +310,8 @@ class AIHumanGame(GameBase):
 
         while not self.game_over():
             self.play_area.print_round()
+            self.display_score()
+
             self.player_2.show_hand()
 
             prize = self.prize_deck.draw()
