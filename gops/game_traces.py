@@ -1,12 +1,7 @@
 import copy
 import json
-import re
-from os import listdir
-from os.path import isfile, join
-import pandas as pd
 
 from gops.cards import Hand
-from gops.statements import move_to_statement
 
 
 class PlayerTraceData():
@@ -147,45 +142,3 @@ class GameTrace():
 
         trace["winner"] = self.game_winner
         return trace
-
-    def write_game_trace(self):
-        print()
-        print("#############################################################")
-        print()
-        for turn in range(1, self.turn):
-            turn_data = self.game_trace[turn]
-            print("turn: ", turn)
-            prev_prize_values = self.cards_to_values(turn_data.previous_prize_cards)
-            print("previous prizes: ", prev_prize_values)
-            current_prize_values = self.cards_to_values(turn_data.prize_cards)
-            print("current_prize_cards", current_prize_values)
-
-            print()
-            print("player 1")
-            print("player_id: ", turn_data.player_1_data.player_id)
-            player_1_hand_values = self.cards_to_values(turn_data.player_1_data.player_hand)
-            print("player_hand: ", player_1_hand_values)
-            print("player_suit: ", turn_data.player_1_data.player_suit)
-            print("player_score: ", turn_data.player_1_data.player_score)
-            player_1_prev_cards_played = self.cards_to_values(turn_data.player_1_data.prev_cards_played)
-            print("prev_cards_played: ", player_1_prev_cards_played)
-            print("card_played: ", turn_data.player_1_data.card_played.value())
-
-            print()
-            print("player 2")
-            print("player_id: ", turn_data.player_2_data.player_id)
-            player_2_hand_values = self.cards_to_values(turn_data.player_2_data.player_hand)
-            print("player_hand: ", player_2_hand_values)
-            print("player_suit: ", turn_data.player_2_data.player_suit)
-            print("player_score: ", turn_data.player_2_data.player_score)
-            player_2_prev_cards_played = self.cards_to_values(turn_data.player_2_data.prev_cards_played)
-            print("prev_cards_played: ", player_2_prev_cards_played)
-            print("card_played: ", turn_data.player_2_data.card_played.value())
-
-            print()
-            print("#############################################################")
-
-        print()
-        print("game winner: ", self.game_winner)
-        print("#############################################################")
-        print()
