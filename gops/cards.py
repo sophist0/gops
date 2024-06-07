@@ -195,22 +195,13 @@ class Hand(SuitCards):
 
         NUM_EPOCHS = 7
         model_version = 7
-        if torch.cuda.is_available():
-            DEVICE = "cuda"
-            NUM_EPOCHS = 7
-            model_version = 7
-        else:
-            DEVICE = "cpu"
-
-        print()
-        print("DEVICE: ", DEVICE)
-        print()
+        DEVICE = ("cuda" if torch.cuda.is_available() else "cpu")
 
         if self.transformer_model is None:
 
             # load transformer model
             modelpath = "models/epoch_" + str(NUM_EPOCHS) + "_v" + str(model_version) + "_cuda"
-            self.transfomer_model = torch.load(modelpath)
+            self.transfomer_model = torch.load(modelpath, map_location=DEVICE)
 
         game_state = state_to_statement(move_data)
 
