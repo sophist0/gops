@@ -8,6 +8,7 @@ from model_components.transformer_components import generate_square_subsequent_m
 
 # function to generate output sequence using greedy algorithm
 def greedy_decode(model, src, src_mask, max_len, start_symbol, DEVICE, EOS_IDX):
+    DEVICE = DEVICE.lower()
     src = src.to(DEVICE)
     src_mask = src_mask.to(DEVICE)
 

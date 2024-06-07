@@ -192,13 +192,24 @@ class Hand(SuitCards):
     
     def select_transformer_model(self, move_data) -> Card:
         # Need all the state info available here for the model to choose a card!
- 
+
+        if torch.cuda.is_available():
+            DEVICE = "cuda"
+            NUM_EPOCHS = 7
+            model_version = 7
+        else:
+            DEVICE = "cpu"
+            NUM_EPOCHS = 6
+            model_version = 7
+
+        print()
+        print("DEVICE: ", DEVICE)
+        print()
+
         if self.transformer_model is None:
 
             # load transformer model
-            NUM_EPOCHS = 7
-            model_version = 7
-            modelpath = "models/epoch_" + str(NUM_EPOCHS) + "_v" + str(model_version)
+            modelpath = "models/epoch_" + str(NUM_EPOCHS) + "_v" + str(model_version) + "_" + DEVICE
             self.transfomer_model = torch.load(modelpath)
 
         game_state = state_to_statement(move_data)
@@ -209,13 +220,12 @@ class Hand(SuitCards):
         UNK_IDX, PAD_IDX, BOS_IDX, EOS_IDX = 0, 1, 2, 3
         special_symbols = ['<unk>', '<pad>', '<bos>', '<eos>']
 
-        DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         token_transform = construct_token_transform(STATE_LANGUAGE, MOVE_LANGUAGE)
 
         ##########################################################################################
         # Load training data to get the transforms.
         ##########################################################################################
-        with open('models/train_data_' + str(NUM_EPOCHS) + '_v' + str(model_version) + '.npy', 'rb') as f:
+        with open('models/train_data_' + str(NUM_EPOCHS) + '_v' + str(model_version) + '_' + DEVICE + '.npy', 'rb') as f:
             train_iter = np.load(f, allow_pickle=True)
 
         vocab_transform = construct_vocab_transform(train_iter, STATE_LANGUAGE, MOVE_LANGUAGE, UNK_IDX, special_symbols, token_transform)
