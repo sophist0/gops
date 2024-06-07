@@ -6,6 +6,7 @@ from gops.cards import Card, CardStack, SuitCards, Hand
 
 CLOSE = 0.00001
 
+
 def get_values(cards):
     values = []
     for card in cards:
@@ -170,3 +171,51 @@ def test_Hand_strategy1():
     k_selected = selected_values_k[13]
     for key in selected_values_k.keys():
         assert k_selected >= selected_values_k[key]
+
+    # test low prize
+    tmp_hand = Hand("Diamonds")
+    card_3 = tmp_hand.select_card_strategy_1(3)
+    assert card_3.nval < 7
+
+    # test high prize
+    selected = defaultdict(int)
+    n_select = 10
+    for x in range(n_select):
+
+        tmp_hand = Hand("Diamonds")
+        card_15 = tmp_hand.select_card_strategy_1(15)
+        selected[card_15.nval] += 1
+
+    assert selected[1] > 0
+    assert selected[13] > 0
+    assert selected[7] == 0
+
+
+def test_Hand_prize_card_strategy():
+
+    card_7 = Card("Hearts", 7)
+    card_k = Card("Spades", "K")
+    card_100 = Card("Clubs", 100)
+    tmp_hand = Hand("Diamonds")
+
+    r1 = tmp_hand.select_prize_card_strategy(card_7)
+    r2 = tmp_hand.select_prize_card_strategy(card_k)
+    r3 = tmp_hand.select_prize_card_strategy(card_100)
+
+    assert r1.value() == 7
+    assert r2.value() == "K"
+    assert r3 is None
+
+def test_Hand_select_transformer_model():
+
+    move_data = {'pre_play_data': {'own_score': '0', 
+                                   'own_hand': ['10', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'J', 'K', 'Q'], 
+                                   'opponent_score': '0', 
+                                   'opponent_hand': ['10', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'J', 'K', 'Q'], 
+                                   'prize_values': ['8'], 
+                                   'previous_prize_values': []}, 
+                                   'post_play_data': {}}
+    
+    tmp_hand = Hand("Diamonds")
+    r1 = tmp_hand.select_transformer_model(move_data)
+    assert isinstance(r1, Card)
