@@ -3,6 +3,7 @@ import io
 from gops.game import Player, AIPlayer, HumanPlayer, PlayArea, GameBase, AIHumanGame
 from gops.cards import Card, SuitCards, Hand
 
+
 def test_Player():
     hand = Hand("Hearts")
     player = Player(hand)
