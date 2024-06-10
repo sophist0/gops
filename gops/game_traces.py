@@ -1,12 +1,7 @@
 import copy
 import json
-import re
-from os import listdir
-from os.path import isfile, join
-import pandas as pd
 
 from gops.cards import Hand
-from gops.statements import move_to_statement
 
 
 class PlayerTraceData():
@@ -25,7 +20,7 @@ class PlayerTraceData():
             if self.player_hand.card_in_stack(card.suit(), card.value())[0] is False:
                 prev_cards_played.append(card)
         return prev_cards_played
-    
+
     def play_data_to_dict(self):
         player_data = {"pre_play_data": {}, "post_play_data": {}}
 
@@ -40,6 +35,7 @@ class PlayerTraceData():
             player_data["post_play_data"]["own_played_card"] = str(self.card_played.value())
 
         return player_data
+
 
 class TurnData():
     def __init__(self, player_1_data: PlayerTraceData, player_2_data: PlayerTraceData, prize_cards):
@@ -143,129 +139,6 @@ class GameTrace():
             trace["turns"][turn] = {}
             trace["turns"][turn]["player_1_move"] = player_1_move
             trace["turns"][turn]["player_2_move"] = player_2_move
-          
+
         trace["winner"] = self.game_winner
         return trace
-    
-    def write_game_trace(self):
-        print()
-        print("#############################################################")
-        print()
-        for turn in range(1, self.turn):
-            turn_data = self.game_trace[turn]
-            print("turn: ", turn)
-            prev_prize_values = self.cards_to_values(turn_data.previous_prize_cards)
-            print("previous prizes: ", prev_prize_values)
-            current_prize_values = self.cards_to_values(turn_data.prize_cards)
-            print("current_prize_cards", current_prize_values)
-
-            print()
-            print("player 1")
-            print("player_id: ", turn_data.player_1_data.player_id)
-            player_1_hand_values = self.cards_to_values(turn_data.player_1_data.player_hand)
-            print("player_hand: ", player_1_hand_values)
-            print("player_suit: ", turn_data.player_1_data.player_suit)
-            print("player_score: ", turn_data.player_1_data.player_score)
-            player_1_prev_cards_played = self.cards_to_values(turn_data.player_1_data.prev_cards_played)
-            print("prev_cards_played: ", player_1_prev_cards_played)
-            print("card_played: ", turn_data.player_1_data.card_played.value())
-
-            print()
-            print("player 2")
-            print("player_id: ", turn_data.player_2_data.player_id)
-            player_2_hand_values = self.cards_to_values(turn_data.player_2_data.player_hand)
-            print("player_hand: ", player_2_hand_values)
-            print("player_suit: ", turn_data.player_2_data.player_suit)
-            print("player_score: ", turn_data.player_2_data.player_score)
-            player_2_prev_cards_played = self.cards_to_values(turn_data.player_2_data.prev_cards_played)
-            print("prev_cards_played: ", player_2_prev_cards_played)
-            print("card_played: ", turn_data.player_2_data.card_played.value())
-
-            print()
-            print("#############################################################")
-
-        print()
-        print("game winner: ", self.game_winner)
-        print("#############################################################")
-        print()
-
-# Class extracts winning moves (state, played_card) pairs from the traces.
-# Here wins are defined as game wins not prize wins.
-class ExtractTraceMoves():
-    def __init__(self, tracepath=None, p1_difficulty=None, p2_difficulty=None):
-        # Added the None default to use the move_to_statement() method
-
-        self.tracespath = tracepath
-        self.p1_difficulty = p1_difficulty
-        self.p2_difficulty = p2_difficulty
-
-        self.traces = None
-        if (self.tracespath is not None) and (self.p1_difficulty is not None) and (self.p2_difficulty is not None): 
-            self.traces = self.get_trace_names()
-
-        self.good_moves = None
-        self.all_moves = None
-
-    def get_trace_names(self):
-        trace_pattern = "p1_d" + str(self.p1_difficulty) + "_p2_d" + str(self.p2_difficulty) + "_trace_"
-        trace_files = [f for f in listdir(self.tracespath) if (isfile(join(self.tracespath, f)) and re.search(trace_pattern, f))]
-        return trace_files
-    
-    # Need to load from json now
-    def load_trace(self, filepath):
-        load_file = filepath
-        with open(load_file, "rb") as file:
-            loaded_game_trace = json.load(file)
-            file.close()
-        return loaded_game_trace
- 
-    def get_moves(self):
-        good_moves = []
-        all_moves = []
-        for trace_name in self.traces:
-
-            trace_data = self.load_trace(self.tracespath + "/" + trace_name)
-            for turn in trace_data["turns"]:
-                turn_data = trace_data["turns"][turn]
-                player_1_move = turn_data["player_1_move"]
-                player_2_move = turn_data["player_2_move"]
-                all_moves.append(player_1_move)
-                all_moves.append(player_2_move)
-                if trace_data["winner"] == 1:
-                    good_moves.append(player_1_move)
-                elif trace_data["winner"] == 2:
-                    good_moves.append(player_2_move)
-                   
-        self.good_moves = good_moves
-        self.all_moves = all_moves
-        return self.all_moves, self.good_moves
-
-    def statements_dict_to_dataframe(self):
-        samples = self.good_moves_and_states_to_statements()
-
-        data = []
-        for sample in samples:
-            row = [sample["state"], sample["move"]]
-            data.append(row)
-        df = pd.DataFrame(data, columns=["State", "Move"])
-        return df
-
-    # TODO: test 
-    def good_moves_and_states_to_statements(self):
-        all_samples = []
-        for trace_name in self.traces:
-            trace_data = self.load_trace(self.tracespath + "/" + trace_name)
-            for turn in trace_data["turns"]:
-                turn_data = trace_data["turns"][turn]
-
-                if trace_data["winner"] == 1:
-                    good_move = turn_data["player_1_move"] 
-                    sample = move_to_statement(good_move)
-                    all_samples.append(sample)
-
-                if trace_data["winner"] == 2:
-                    good_move = turn_data["player_2_move"] 
-                    sample = move_to_statement(good_move)
-                    all_samples.append(sample)
-
-        return all_samples

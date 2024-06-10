@@ -206,16 +206,17 @@ def test_Hand_prize_card_strategy():
     assert r2.value() == "K"
     assert r3 is None
 
+
 def test_Hand_select_transformer_model():
 
-    move_data = {'pre_play_data': {'own_score': '0', 
-                                   'own_hand': ['10', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'J', 'K', 'Q'], 
-                                   'opponent_score': '0', 
-                                   'opponent_hand': ['10', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'J', 'K', 'Q'], 
-                                   'prize_values': ['8'], 
-                                   'previous_prize_values': []}, 
+    move_data = {'pre_play_data': {'own_score': '0',
+                                   'own_hand': ['10', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'J', 'K', 'Q'],
+                                   'opponent_score': '0',
+                                   'opponent_hand': ['10', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'J', 'K', 'Q'],
+                                   'prize_values': ['8'],
+                                   'previous_prize_values': []},
                                    'post_play_data': {}}
-    
+
     tmp_hand = Hand("Diamonds")
     r1 = tmp_hand.select_transformer_model(move_data)
     assert isinstance(r1, Card)
