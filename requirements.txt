@@ -1,4 +1,5 @@
 numpy
+pytest
 pytest-mock
 pandas
 torch == 2.3.0
