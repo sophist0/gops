@@ -5,6 +5,8 @@ from typing import List, Tuple, Union
 
 import gops.ui_elements as ui
 
+from gops.bid_prediction import StrategyCollection, get_player_bid_efficiency
+
 from model_components.inference_components import translate_greedy
 from model_components.transformer_components import construct_vocab_transform, construct_text_transform, construct_token_transform
 
@@ -120,6 +122,11 @@ class Hand(SuitCards):
         self.transformer_model = None
         self._bad_selections = 0
 
+        # probabilistic strategy 2
+        self.strat_collection = None
+        self.current_turn = 0
+        self.opp_hand = None
+
     def select_random_card(self) -> Card:
         selected = random.choice(range(self.card_count()))
         return self._order.pop(selected)
@@ -160,6 +167,15 @@ class Hand(SuitCards):
             idx += 1
         return None
 
+    def find_card(self, target_card) -> Card:
+        card_values = self.get_card_nvals()
+        idx = 0
+        for val in card_values:
+            if val == target_card.nval:
+                return self._order.pop(idx)
+            idx += 1
+        return None
+
     def select_card_strategy_1(self, prize_value) -> Card:
         # if prize_value < 7, select near min value vard.
         # else select card close to prize value.
@@ -188,6 +204,43 @@ class Hand(SuitCards):
             card_loc = 0
 
         return self._order.pop(card_loc)
+
+    def select_card_strategy_2(self, prize_value) -> Card:
+        # Probabilistic strategy 2
+
+        # Attempts to predict the opponent bid and then using that knowledge
+        # play the player bid with the highest bid efficiency
+
+        # ---------------------------------------------------------------------------------------
+        # self.opp_hand and self.strat_collection updated in AIPlayer.update_state()
+        # ---------------------------------------------------------------------------------------
+
+        self.current_turn += 1
+        if self.strat_collection is None:
+            self.strat_collection = StrategyCollection()
+            self.opp_hand = np.asarray([x+1 for x in range(13)])
+
+        pred_strat = self.strat_collection.predicted_strategy(self.current_turn, prize_value)
+
+        pred_opp_bid = prize_value + pred_strat.bid_diff
+        pred_diff = np.absolute(self.opp_hand - pred_opp_bid)
+        min_idx = np.argmin(pred_diff)
+
+        constrained_pred_opp_bid = self.opp_hand[min_idx]
+        possible_player_bids = self.get_card_nvals()
+        bid_efficiency, max_idx, max_val = get_player_bid_efficiency(prize_value, constrained_pred_opp_bid, possible_player_bids)
+
+        card_val = possible_player_bids[max_idx-1]
+
+        # print()
+        # print("----------------------------------------------------------------")
+        # print("opp_hand: ", self.opp_hand)
+        # print("constrained_pred_opp_bid: ", constrained_pred_opp_bid)
+        # print("agent card_val bid: ", card_val)
+        # print()
+
+        card_obj = Card("Hearts", int(card_val))
+        return self.find_card(card_obj)
 
     def select_transformer_model(self, move_data) -> Card:
         # Need all the state info available here for the model to choose a card!

@@ -42,9 +42,13 @@ class AIPlayer(Player):
             turn_data = game_state.game_trace[game_state.turn]
             move_data = turn_data.player_game_state_to_dict(self.id)
             return self._hand.select_transformer_model(move_data)
+        elif self._difficulty == 5:
+            selected_card = self._hand.select_card_strategy_2(prize_value)
+            return selected_card
+
 
     def set_difficulty(self, difficulty: int):
-        if difficulty not in [1, 2, 3, 4]:
+        if difficulty not in [1, 2, 3, 4, 5]:
             raise Exception("Bad difficulty.")
         self._difficulty = difficulty
 
@@ -220,10 +224,11 @@ class AIHumanGame(GameBase):
             print("2: Selects same card as prize")
             print("3: Selects random card biased toward prize value")
             print("4: Selects card using a Transformer model")
+            print("5: Selects card using probabilistic model with memory")
             print()
 
-            selected = input("Select AI difficulty [1, 2, 3, 4]: ")
-            if selected not in ["1", "2", "3", "4"]:
+            selected = input("Select AI difficulty [1, 2, 3, 4, 5]: ")
+            if selected not in ["1", "2", "3", "4", "5"]:
                 print("Invalid selection.")
                 print()
             else:
