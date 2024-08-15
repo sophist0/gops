@@ -8,9 +8,9 @@ class Strategy:
         self.prize = prize
         self.bid_diff = bid_diff
 
-    def get_strategy(self):
+    def get_strategy(self) -> tuple:
         return (self.turn, self.prize, self.bid_diff)
-    
+
 class StrategyCollection:
 
     def __init__(self):
@@ -19,15 +19,15 @@ class StrategyCollection:
         self.max_prize = 13
         self._init_collection()
 
-    def _get_key(self, turn, prize):
+    def _get_key(self, turn: int, prize: int) -> str:
         return str(turn) + "|" + str(prize)
-    
-    def _get_base_strat_prob(self, cturn, cprize, strat):
-            dturn = cturn - strat.turn
-            dprize = abs(cprize - strat.prize)
-            return math.exp(-(dturn + dprize))
 
-    def _get_norm_constant(self, cturn, cprize):
+    def _get_base_strat_prob(self, cturn: int, cprize: int, strat: Strategy):
+        dturn = cturn - strat.turn
+        dprize = abs(cprize - strat.prize)
+        return math.exp(-(dturn + dprize))
+
+    def _get_norm_constant(self, cturn: int, cprize: int) -> float:
         norm_const = 0
         for key in self.collection.keys():
             strat = self.collection[key]
@@ -43,16 +43,16 @@ class StrategyCollection:
             key = self._get_key(turn, x)
             self.collection[key] = strat
 
-    def add_strategy(self, new_strat):
+    def add_strategy(self, new_strat: Strategy):
         key = self._get_key(new_strat.turn, new_strat.prize)
         self.collection[key] = new_strat
 
-    def _get_strat_prob(self, cturn, cprize, strat, norm_const):
+    def _get_strat_prob(self, cturn: int, cprize: int, strat: Strategy, norm_const: float) -> float:
         base_prob = self._get_base_strat_prob(cturn, cprize, strat)
         norm_prob = base_prob / norm_const
         return norm_prob
 
-    def predicted_strategy(self, cturn, cprize):
+    def predicted_strategy(self, cturn: int, cprize: int) -> Strategy:
         norm_const = self._get_norm_constant(cturn, cprize)
         rand = random.random()
 
@@ -65,10 +65,8 @@ class StrategyCollection:
             if rand <= total_prob:
                 return strat
 
-#############################################################3
-
 # NOTE: This function probably needs to be adjusted
-def get_player_bid_efficiency(r, bo, bpvec):
+def get_player_bid_efficiency(r: int, bo: int, bpvec: list) -> tuple:
     c = 3.5
     mval = -1
     mdx = None

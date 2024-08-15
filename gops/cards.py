@@ -157,7 +157,7 @@ class Hand(SuitCards):
             if r <= s:
                 return x
 
-    def select_prize_card_strategy(self, prize_card) -> Card:
+    def select_prize_card_strategy(self, prize_card: Card) -> Card:
         # selects same card as last prize card
         card_values = self.get_card_nvals()
         idx = 0
@@ -167,7 +167,7 @@ class Hand(SuitCards):
             idx += 1
         return None
 
-    def find_card(self, target_card) -> Card:
+    def find_card(self, target_card: Card) -> Card:
         card_values = self.get_card_nvals()
         idx = 0
         for val in card_values:
@@ -176,7 +176,7 @@ class Hand(SuitCards):
             idx += 1
         return None
 
-    def select_card_strategy_1(self, prize_value) -> Card:
+    def select_card_strategy_1(self, prize_value: int) -> Card:
         # if prize_value < 7, select near min value vard.
         # else select card close to prize value.
         # TODO: Alg. assumes cards are sorted. Should check this!
@@ -205,16 +205,11 @@ class Hand(SuitCards):
 
         return self._order.pop(card_loc)
 
-    def select_card_strategy_2(self, prize_value) -> Card:
+    def select_card_strategy_2(self, prize_value: int) -> Card:
         # Probabilistic strategy 2
 
         # Attempts to predict the opponent bid and then using that knowledge
         # play the player bid with the highest bid efficiency
-
-        # ---------------------------------------------------------------------------------------
-        # self.opp_hand and self.strat_collection updated in AIPlayer.update_state()
-        # ---------------------------------------------------------------------------------------
-
         self.current_turn += 1
         if self.strat_collection is None:
             self.strat_collection = StrategyCollection()
@@ -231,18 +226,10 @@ class Hand(SuitCards):
         bid_efficiency, max_idx, max_val = get_player_bid_efficiency(prize_value, constrained_pred_opp_bid, possible_player_bids)
 
         card_val = possible_player_bids[max_idx-1]
-
-        # print()
-        # print("----------------------------------------------------------------")
-        # print("opp_hand: ", self.opp_hand)
-        # print("constrained_pred_opp_bid: ", constrained_pred_opp_bid)
-        # print("agent card_val bid: ", card_val)
-        # print()
-
         card_obj = Card("Hearts", int(card_val))
         return self.find_card(card_obj)
 
-    def select_transformer_model(self, move_data) -> Card:
+    def select_transformer_model(self, move_data: dict) -> Card:
         # Need all the state info available here for the model to choose a card!
 
         NUM_EPOCHS = 7
@@ -319,7 +306,7 @@ class Hand(SuitCards):
             print()
 
 
-def card_value_to_nval(vec):
+def card_value_to_nval(vec: list) -> list:
     convert_map = {"0": 0, "A": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6, "7": 7,
                    "8": 8, "9": 9, "10": 10, "J": 11, "Q": 12, "K": 13}
     nvec = []
@@ -328,7 +315,7 @@ def card_value_to_nval(vec):
     return nvec
 
 
-def hand_to_played(hand):
+def hand_to_played(hand: Hand) -> list:
     deck = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
     played = []
     for val in deck:
@@ -337,7 +324,7 @@ def hand_to_played(hand):
     return played
 
 
-def state_to_statement(game_move):
+def state_to_statement(game_move: dict) -> str:
     tmp_state = ""
     phw = game_move["pre_play_data"]["own_hand"]
     phw = card_value_to_nval(phw)

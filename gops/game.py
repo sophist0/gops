@@ -126,7 +126,7 @@ class PlayArea():
                                                        self.player_2_card.suit(), ui.VERT))
         print()
 
-    def prize_value(self):
+    def prize_value(self) -> int:
         total = 0
         for card in self.prize_cards:
             total += card.nval
@@ -165,7 +165,7 @@ class GameBase():
         self.play_area = PlayArea()
         self.winner = None
 
-    def game_over(self):
+    def game_over(self) -> bool:
         if self.prize_deck.empty():
             return True
         elif self.player_1.quit_value():
