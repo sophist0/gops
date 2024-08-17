@@ -85,7 +85,6 @@ class GameTrace():
         self.game_winner = None
 
     def update_trace(self, player_1, player_2, prize_cards):
-
         player_1_data = PlayerTraceData(player_1.id, player_1._hand, player_1._score)
         player_2_data = PlayerTraceData(player_2.id, player_2._hand, player_2._score)
         current_turn = TurnData(player_1_data, player_2_data, prize_cards)

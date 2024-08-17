@@ -1,10 +1,12 @@
 import os
 from typing import Union
+import numpy as np
 
 import gops.ui_elements as ui
 from gops.cards import SuitCards, Hand, Card
 from gops.game_traces import GameTrace
 
+from gops.bid_prediction import Strategy
 
 class Player():
     def __init__(self, hand: Hand):
@@ -25,32 +27,32 @@ class Player():
         return self._quit
 
 
-class AIPlayer(Player):
-    def __init__(self, id, hand: Hand, difficulty: int = 1):
-        Player.__init__(self, hand)
-        self._difficulty = difficulty
-        self.id = id
+# class AIPlayer(Player):
+#     def __init__(self, transformer_params, id, hand: Hand, difficulty: int = 1):
+#         Player.__init__(self, hand)
+#         self._difficulty = difficulty
+#         self.id = id
 
-    def play_card(self, prize_value: int, prize_card: Card, game_state) -> Card:
-        if self._difficulty == 1:
-            return self._hand.select_random_card()
-        elif self._difficulty == 2:
-            return self._hand.select_prize_card_strategy(prize_card)
-        elif self._difficulty == 3:
-            return self._hand.select_card_strategy_1(prize_value)
-        elif self._difficulty == 4:
-            turn_data = game_state.game_trace[game_state.turn]
-            move_data = turn_data.player_game_state_to_dict(self.id)
-            return self._hand.select_transformer_model(move_data)
-        elif self._difficulty == 5:
-            selected_card = self._hand.select_card_strategy_2(prize_value)
-            return selected_card
+#     def play_card(self, prize_value: int, prize_card: Card, game_state) -> Card:
+#         if self._difficulty == 1:
+#             return self._hand.select_random_card()
+#         elif self._difficulty == 2:
+#             return self._hand.select_prize_card_strategy(prize_card)
+#         elif self._difficulty == 3:
+#             return self._hand.select_card_strategy_1(prize_value)
+#         elif self._difficulty == 4:
+#             turn_data = game_state.game_trace[game_state.turn]
+#             move_data = turn_data.player_game_state_to_dict(self.id)
+#             return self._hand.select_transformer_model(move_data)
+#         elif self._difficulty == 5:
+#             selected_card = self._hand.select_card_strategy_2(prize_value)
+#             return selected_card
 
 
-    def set_difficulty(self, difficulty: int):
-        if difficulty not in [1, 2, 3, 4, 5]:
-            raise Exception("Bad difficulty.")
-        self._difficulty = difficulty
+#     def set_difficulty(self, difficulty: int):
+#         if difficulty not in [1, 2, 3, 4, 5]:
+#             raise Exception("Bad difficulty.")
+#         self._difficulty = difficulty
 
 
 class HumanPlayer(Player):
@@ -77,6 +79,63 @@ class HumanPlayer(Player):
                 value = self.str_2_val[value]
                 card = self._hand.select_card(self._hand.suit, value)
         return card
+
+class AIPlayer(Player):
+    def __init__(self, transformer_params, id, hand: Hand, difficulty: int = 1):
+        Player.__init__(self, hand)
+        self._difficulty = difficulty
+        self.id = id
+
+        NUM_EPOCHS = transformer_params["epochs"]
+        model_version = transformer_params["version"]
+        train_device = transformer_params["train_device"]
+        self.tokenizer = transformer_params["tokenizer"]
+        self.topk = transformer_params["topk"]
+        self.run_device = transformer_params["run_device"]
+
+        base_name = self._get_model_base_name(NUM_EPOCHS, model_version, train_device)
+        self.tokenizer_path = "models/" + base_name + "_"
+        self.model_path = "models/epoch_" + base_name
+        self.train_data_path = "models/train_data_" + base_name + ".npy"
+
+    def _get_model_base_name(self, NUM_EPOCHS, model_version, train_device):
+        return str(NUM_EPOCHS) + "_v" + str(model_version) + "_" + str(train_device) + "_" + self.tokenizer
+
+    def update_state(self, prize, opp_played_card, current_turn):
+        if self._difficulty == 6:
+            bid_diff = opp_played_card.nval - prize.nval
+            strat = Strategy(current_turn, prize.nval, bid_diff)
+            self._hand.strat_collection.add_strategy(strat)
+
+            index = np.argwhere(self._hand.opp_hand == opp_played_card.nval)
+            self._hand.opp_hand = np.delete(self._hand.opp_hand, index)
+
+            # print()
+            # print("after update")
+            # print("opp_hand: ", self._hand.opp_hand)
+            # print("added strategy: ", strat.get_strategy())
+            # print()
+
+    def play_card(self, prize_value: int, prize_card: Card, game_state) -> Card:
+        if self._difficulty == 1:
+            return self._hand.select_random_card()
+        elif self._difficulty == 2:
+            return self._hand.select_prize_card_strategy(prize_card)
+        elif self._difficulty == 3:
+            return self._hand.select_card_strategy_1(prize_value)
+        elif self._difficulty == 4:
+            turn_data = game_state.game_trace[game_state.turn]
+            move_data = turn_data.player_game_state_to_dict(self.id)
+            return self._hand.select_transformer_model(move_data, self.model_path, self.tokenizer_path, self.train_data_path, self.topk, self.run_device, self.tokenizer)
+        elif self._difficulty == 5:
+            selected_card = self._hand.select_card_strategy_2(prize_value)
+            return selected_card
+
+    def set_difficulty(self, difficulty: int):
+        if difficulty not in [1, 2, 3, 4, 5, 6]:
+            raise Exception("Bad difficulty.")
+        self._difficulty = difficulty
+
 
 
 class PlayArea():
@@ -208,8 +267,9 @@ class GameBase():
 
 
 class AIHumanGame(GameBase):
-    def __init__(self, reset=True):
-        player_1 = AIPlayer(1, Hand("Hearts"))
+    def __init__(self, transformer_params, reset=True):
+        self.transformer_params = transformer_params
+        player_1 = AIPlayer(self.transformer_params, 1, Hand("Hearts"))
         player_2 = HumanPlayer(2, Hand("Spades"))
         GameBase.__init__(self, player_1, player_2, reset)
         self.game_trace = GameTrace()
