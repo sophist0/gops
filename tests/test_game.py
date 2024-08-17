@@ -21,7 +21,15 @@ def test_Player():
 
 def test_AIPlayer():
     hand = Hand("Hearts")
-    player = AIPlayer(1, hand)
+    transformer_params = {"epochs": 5,
+                        "version": 35,
+                        "topk": 1,
+                        "run_device": "cuda",
+                        "train_device": "cuda",
+                        "tokenizer": "TT",
+                        "nproc": 12}
+
+    player = AIPlayer(transformer_params, 1, hand)
     card = player.play_card(1, hand._order[0], None)            # TODO: pass in game state
 
     assert isinstance(card, Card)
@@ -50,8 +58,17 @@ def setup_AIAI_game():
 
     play_area_1 = PlayArea()
     prize_deck = SuitCards("Clubs")
-    player_1 = AIPlayer(1, Hand("Hearts"))
-    player_2 = AIPlayer(2, Hand("Spades"))
+
+    transformer_params = {"epochs": 5,
+                        "version": 35,
+                        "topk": 1,
+                        "run_device": "cuda",
+                        "train_device": "cuda",
+                        "tokenizer": "TT",
+                        "nproc": 12}
+
+    player_1 = AIPlayer(transformer_params, 1, Hand("Hearts"))
+    player_2 = AIPlayer(transformer_params, 2, Hand("Spades"))
 
     return [play_area_1, prize_deck, player_1, player_2]
 
@@ -158,7 +175,16 @@ def test_GameBase():
     game_1.display_score()
 
 def test_AIHumanGame(mocker):
-    human_game = AIHumanGame(reset=False)
+
+    transformer_params = {"epochs": 5,
+                        "version": 35,
+                        "topk": 1,
+                        "run_device": "cuda",
+                        "train_device": "cuda",
+                        "tokenizer": "TT",
+                        "nproc": 12}
+
+    human_game = AIHumanGame(transformer_params, reset=False)
     v = io.StringIO("\r")
     s = ["1", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
     print(type(s[0]))

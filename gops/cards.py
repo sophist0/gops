@@ -255,10 +255,18 @@ class Hand(SuitCards):
             #     pass
 
             # load transformer model
+
+            print("Device: ", DEVICE)
+
             self.transformer_model = torch.load(modelpath, map_location=DEVICE)
 
             # load tokenizer
             if tokenizer_lib == "HF":
+
+                print()
+                print(tokenizer_path + "state_tokenizer.json")
+                print()
+
                 self.state_tokenizer = Tokenizer.from_file(tokenizer_path + "state_tokenizer.json")
                 self.move_tokenizer = Tokenizer.from_file(tokenizer_path + "move_tokenizer.json")
 

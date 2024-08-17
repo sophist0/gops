@@ -218,5 +218,17 @@ def test_Hand_select_transformer_model():
                                    'post_play_data': {}}
 
     tmp_hand = Hand("Diamonds")
-    r1 = tmp_hand.select_transformer_model(move_data)
+    NUM_EPOCHS = 7
+    model_version = 45
+    topk = 1
+    train_device = "xpu"
+    run_device = "cpu"
+    tokenizer = "HF"
+
+    tokenizer_path = "models/" + str(NUM_EPOCHS) + "_v" + str(model_version) + "_" + str(train_device) + "_" + tokenizer + "_"
+    modelpath = "models/epoch_" + str(NUM_EPOCHS) + "_v" + str(model_version) + "_" + str(train_device) + "_" + tokenizer
+    traindata_path = "models/train_data_" + str(NUM_EPOCHS) + "_v" + str(model_version) + "_" + str(train_device) + "_" + tokenizer + ".npy"
+
+    r1 = tmp_hand.select_transformer_model(move_data, modelpath, tokenizer_path, traindata_path, topk, run_device, tokenizer)
     assert isinstance(r1, Card)
+
