@@ -239,7 +239,7 @@ class Hand(SuitCards):
     def select_transformer_model(self, move_data, app_path, topk, DEVICE, tokenizer_lib) -> Card:
         # Need all the state info available here for the model to choose a card!
 
-        tokenizer_path = app_path["tokenizer_path"]
+        # tokenizer_path = app_path["tokenizer_path"]
         modelpath = app_path["model_path"]
 
         game_state = state_to_statement(move_data)
@@ -254,8 +254,8 @@ class Hand(SuitCards):
             # load tokenizer
             if tokenizer_lib == "HF":
 
-                self.state_tokenizer = Tokenizer.from_file(tokenizer_path + "state_tokenizer.json")
-                self.move_tokenizer = Tokenizer.from_file(tokenizer_path + "move_tokenizer.json")
+                self.state_tokenizer = Tokenizer.from_file(app_path["state_tokenizer_path"])
+                self.move_tokenizer = Tokenizer.from_file(app_path["move_tokenizer_path"])
 
                 self.text_transform = construct_text_transform(self.state_tokenizer, self.move_tokenizer, STATE_LANGUAGE, MOVE_LANGUAGE)
                 selected_card = translate_random(self.transformer_model, game_state, self.text_transform, MOVE_LANGUAGE, STATE_LANGUAGE, BOS_IDX, DEVICE, EOS_IDX, topk)
