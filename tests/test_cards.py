@@ -2,6 +2,7 @@ import copy
 import numpy as np
 from collections import defaultdict
 
+from gops.util import get_path_names
 from gops.cards import Card, CardStack, SuitCards, Hand
 
 CLOSE = 0.00001
@@ -225,10 +226,7 @@ def test_Hand_select_transformer_model():
     run_device = "cpu"
     tokenizer = "HF"
 
-    tokenizer_path = "models/" + str(NUM_EPOCHS) + "_v" + str(model_version) + "_" + str(train_device) + "_" + tokenizer + "_"
-    modelpath = "models/epoch_" + str(NUM_EPOCHS) + "_v" + str(model_version) + "_" + str(train_device) + "_" + tokenizer
-    traindata_path = "models/train_data_" + str(NUM_EPOCHS) + "_v" + str(model_version) + "_" + str(train_device) + "_" + tokenizer + ".npy"
-
-    r1 = tmp_hand.select_transformer_model(move_data, modelpath, tokenizer_path, traindata_path, topk, run_device, tokenizer)
+    app_paths = get_path_names(NUM_EPOCHS, model_version, train_device, tokenizer)
+    r1 = tmp_hand.select_transformer_model(move_data, app_paths, topk, run_device, tokenizer)
     assert isinstance(r1, Card)
 

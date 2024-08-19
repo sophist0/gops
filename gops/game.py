@@ -5,6 +5,7 @@ import numpy as np
 import gops.ui_elements as ui
 from gops.cards import SuitCards, Hand, Card
 from gops.game_traces import GameTrace
+from gops.util import get_path_names
 
 from gops.bid_prediction import Strategy
 
@@ -64,13 +65,7 @@ class AIPlayer(Player):
         self.topk = transformer_params["topk"]
         self.run_device = transformer_params["run_device"]
 
-        base_name = self._get_model_base_name(NUM_EPOCHS, model_version, train_device)
-        self.tokenizer_path = "models/" + base_name + "_"
-        self.model_path = "models/epoch_" + base_name
-        self.train_data_path = "models/train_data_" + base_name + ".npy"
-
-    def _get_model_base_name(self, NUM_EPOCHS, model_version, train_device):
-        return str(NUM_EPOCHS) + "_v" + str(model_version) + "_" + str(train_device) + "_" + self.tokenizer
+        self.app_paths = get_path_names(NUM_EPOCHS, model_version, train_device, self.tokenizer)
 
     def update_state(self, prize, opp_played_card, current_turn):
         if self._difficulty == 6:
@@ -91,7 +86,7 @@ class AIPlayer(Player):
         elif self._difficulty == 4:
             turn_data = game_state.game_trace[game_state.turn]
             move_data = turn_data.player_game_state_to_dict(self.id)
-            return self._hand.select_transformer_model(move_data, self.model_path, self.tokenizer_path, self.train_data_path, self.topk, self.run_device, self.tokenizer)
+            return self._hand.select_transformer_model(move_data, self.app_paths, self.topk, self.run_device, self.tokenizer)
         elif self._difficulty == 5:
             selected_card = self._hand.select_card_strategy_2(prize_value)
             return selected_card
