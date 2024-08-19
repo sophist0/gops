@@ -239,7 +239,6 @@ class Hand(SuitCards):
     def select_transformer_model(self, move_data, app_path, topk, DEVICE, tokenizer_lib) -> Card:
         # Need all the state info available here for the model to choose a card!
 
-        # tokenizer_path = app_path["tokenizer_path"]
         modelpath = app_path["model_path"]
 
         game_state = state_to_statement(move_data)
