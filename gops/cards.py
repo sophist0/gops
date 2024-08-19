@@ -10,9 +10,6 @@ import gops.ui_elements as ui
 
 from gops.bid_prediction import StrategyCollection, get_player_bid_efficiency
 
-# from model_components.inference_components import translate_greedy
-# from model_components.OLD_transformer_components import construct_vocab_transform, construct_text_transform, construct_token_transform
-
 from model_components.inference_components import translate_random
 from model_components.transformer_components import construct_text_transform
 
@@ -246,26 +243,13 @@ class Hand(SuitCards):
 
         STATE_LANGUAGE = 'state'
         MOVE_LANGUAGE = 'move'
-        UNK_IDX, BOS_IDX, EOS_IDX = 0, 1, 2
-        special_symbols = ['<unk>', '<bos>', '<eos>']
+        BOS_IDX, EOS_IDX = 1, 2
 
         if self.transformer_model is None:
-            # if DEVICE == "xpu":
-            #     # import intel_extension_for_pytorch as ipex
-            #     pass
-
-            # load transformer model
-
-            print("Device: ", DEVICE)
-
             self.transformer_model = torch.load(modelpath, map_location=DEVICE)
 
             # load tokenizer
             if tokenizer_lib == "HF":
-
-                print()
-                print(tokenizer_path + "state_tokenizer.json")
-                print()
 
                 self.state_tokenizer = Tokenizer.from_file(tokenizer_path + "state_tokenizer.json")
                 self.move_tokenizer = Tokenizer.from_file(tokenizer_path + "move_tokenizer.json")
@@ -274,34 +258,13 @@ class Hand(SuitCards):
                 selected_card = translate_random(self.transformer_model, game_state, self.text_transform, MOVE_LANGUAGE, STATE_LANGUAGE, BOS_IDX, DEVICE, EOS_IDX, topk)
 
             elif tokenizer_lib == "TT":
-
                 raise Exception("Bad tokenizer library TT")
 
-                # # Define special symbols and indices
-                # UNK_IDX, PAD_IDX, BOS_IDX, EOS_IDX = 0, 1, 2, 3
-                # special_symbols = ['<unk>', '<pad>', '<bos>', '<eos>']
-
-                # self.old_token_transform = OLD_construct_token_splitter(STATE_LANGUAGE, MOVE_LANGUAGE)
-
-                # ##########################################################################################
-                # # Load training data to get the transforms.
-                # ##########################################################################################
-                # with open(traindata_path, 'rb') as f:
-                #     train_iter = np.load(f, allow_pickle=True)
-
-                # self.old_vocab_transform = OLD_construct_vocab_transform(train_iter, STATE_LANGUAGE, MOVE_LANGUAGE, UNK_IDX, special_symbols, self.old_token_transform)
-                # self.old_text_transform = OLD_construct_text_transform(self.old_token_transform, self.old_vocab_transform, STATE_LANGUAGE, MOVE_LANGUAGE, BOS_IDX, EOS_IDX)
 
         if tokenizer_lib == "HF":
             selected_card = translate_random(self.transformer_model, game_state, self.text_transform, MOVE_LANGUAGE, STATE_LANGUAGE, BOS_IDX, DEVICE, EOS_IDX, topk)
         elif tokenizer_lib == "TT":
-
             raise Exception("Bad tokenizer library TT")
-
-            # UNK_IDX, PAD_IDX, BOS_IDX, EOS_IDX = 0, 1, 2, 3
-            # special_symbols = ['<unk>', '<pad>', '<bos>', '<eos>']
-
-            # selected_card = OLD_translate_greedy(self.transformer_model, game_state, self.old_text_transform, self.old_vocab_transform, MOVE_LANGUAGE, STATE_LANGUAGE, BOS_IDX, DEVICE, EOS_IDX)
 
         selected_val = int(selected_card.split("_")[2])
         for idx, card in enumerate(self._order):
@@ -310,51 +273,6 @@ class Hand(SuitCards):
 
         self._bad_selections += 1
         return self.select_random_card()
-
-    # def select_transformer_model(self, move_data: dict) -> Card:
-    #     # Need all the state info available here for the model to choose a card!
-
-    #     NUM_EPOCHS = 7
-    #     model_version = 7
-    #     DEVICE = ("cuda" if torch.cuda.is_available() else "cpu")
-
-    #     if self.transformer_model is None:
-
-    #         # load transformer model
-    #         modelpath = "models/epoch_" + str(NUM_EPOCHS) + "_v" + str(model_version) + "_cuda"
-    #         self.transfomer_model = torch.load(modelpath, map_location=DEVICE)
-
-    #     game_state = state_to_statement(move_data)
-
-    #     # Define special symbols and indices
-    #     STATE_LANGUAGE = 'state'
-    #     MOVE_LANGUAGE = 'move'
-    #     UNK_IDX, PAD_IDX, BOS_IDX, EOS_IDX = 0, 1, 2, 3
-    #     special_symbols = ['<unk>', '<pad>', '<bos>', '<eos>']
-
-    #     token_transform = construct_token_transform(STATE_LANGUAGE, MOVE_LANGUAGE)
-
-    #     ##########################################################################################
-    #     # Load training data to get the transforms.
-    #     ##########################################################################################
-    #     with open('models/train_data_' + str(NUM_EPOCHS) + '_v' + str(model_version) + '_cuda' + '.npy', 'rb') as f:
-    #         train_iter = np.load(f, allow_pickle=True)
-
-    #     vocab_transform = construct_vocab_transform(train_iter, STATE_LANGUAGE, MOVE_LANGUAGE, UNK_IDX, special_symbols, token_transform)
-    #     text_transform = construct_text_transform(token_transform, vocab_transform, STATE_LANGUAGE, MOVE_LANGUAGE, BOS_IDX, EOS_IDX)
-
-    #     selected_card = translate_greedy(self.transfomer_model, game_state, text_transform, vocab_transform, MOVE_LANGUAGE, STATE_LANGUAGE, BOS_IDX, DEVICE, EOS_IDX)
-    #     selected_val = int(selected_card.split("_")[2])
-
-    #     print()
-    #     for idx, card in enumerate(self._order):
-    #         if card.get_num_value() == selected_val:
-    #             print("AI Player card selected using a transformer model")
-    #             return self._order.pop(idx)
-
-    #     print("AI Player card selected randomly")
-    #     self._bad_selections += 1
-    #     return self.select_random_card()
 
     def select_card(self, suit: str, val: int) -> Union[int, None]:
         in_stack, card_loc = self.card_in_stack(suit, val)

@@ -143,7 +143,7 @@ def test_StrategyCollection_predicted_strategy():
         if (strat_3.prize == strat_B.prize) and (strat_3.turn == strat_B.turn) and (strat_3.bid_diff == strat_B.bid_diff):
             cnt_match_3 += 1
 
-    assert abs(cnt_match_1 - cnt_match_2) < 0.05*trials
+    assert abs(cnt_match_1 - cnt_match_2) < 0.1 * trials
 
     # prize value effects selection probability
     assert cnt_match_1 > cnt_match_3

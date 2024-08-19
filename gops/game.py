@@ -26,35 +26,6 @@ class Player():
     def quit_value(self) -> bool:
         return self._quit
 
-
-# class AIPlayer(Player):
-#     def __init__(self, transformer_params, id, hand: Hand, difficulty: int = 1):
-#         Player.__init__(self, hand)
-#         self._difficulty = difficulty
-#         self.id = id
-
-#     def play_card(self, prize_value: int, prize_card: Card, game_state) -> Card:
-#         if self._difficulty == 1:
-#             return self._hand.select_random_card()
-#         elif self._difficulty == 2:
-#             return self._hand.select_prize_card_strategy(prize_card)
-#         elif self._difficulty == 3:
-#             return self._hand.select_card_strategy_1(prize_value)
-#         elif self._difficulty == 4:
-#             turn_data = game_state.game_trace[game_state.turn]
-#             move_data = turn_data.player_game_state_to_dict(self.id)
-#             return self._hand.select_transformer_model(move_data)
-#         elif self._difficulty == 5:
-#             selected_card = self._hand.select_card_strategy_2(prize_value)
-#             return selected_card
-
-
-#     def set_difficulty(self, difficulty: int):
-#         if difficulty not in [1, 2, 3, 4, 5]:
-#             raise Exception("Bad difficulty.")
-#         self._difficulty = difficulty
-
-
 class HumanPlayer(Player):
     def __init__(self, id, hand: Hand):
         Player.__init__(self, hand)
@@ -110,12 +81,6 @@ class AIPlayer(Player):
             index = np.argwhere(self._hand.opp_hand == opp_played_card.nval)
             self._hand.opp_hand = np.delete(self._hand.opp_hand, index)
 
-            # print()
-            # print("after update")
-            # print("opp_hand: ", self._hand.opp_hand)
-            # print("added strategy: ", strat.get_strategy())
-            # print()
-
     def play_card(self, prize_value: int, prize_card: Card, game_state) -> Card:
         if self._difficulty == 1:
             return self._hand.select_random_card()
@@ -135,7 +100,6 @@ class AIPlayer(Player):
         if difficulty not in [1, 2, 3, 4, 5, 6]:
             raise Exception("Bad difficulty.")
         self._difficulty = difficulty
-
 
 
 class PlayArea():
